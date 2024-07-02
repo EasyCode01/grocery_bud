@@ -11,6 +11,15 @@ interface ListManagerInterface {
   getItems(): ListItem[]
 }
 
+type UiElement = HTMLUListElement | HTMLDivElement
+
+interface UiManagerInterface {
+  uiListElement: UiElement
+  uiAppElement: UiElement
+  themeMode: string
+  switchMode(currentThemeMode: string): void
+}
+
 class ListManager implements ListManagerInterface {
   private _items: ListItem[] = []
 
