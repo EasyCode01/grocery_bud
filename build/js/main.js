@@ -1,4 +1,16 @@
 "use strict";
+class UiManager {
+    constructor(uiListElement, uiAppElement) {
+        this.uiListElement = uiListElement;
+        this.uiAppElement = uiAppElement;
+    }
+    activateLightMode() {
+        return `Light mode activated`;
+    }
+    activateDarkMode() {
+        return `Dark mode activated`;
+    }
+}
 class ListManager {
     constructor() {
         this._items = [];
@@ -24,4 +36,9 @@ class ListManager {
     getItems() {
         return this._items;
     }
+}
+const uiListElement = document.querySelector('.item__container');
+const uiAppElement = document.querySelector('.app');
+if (uiListElement && uiAppElement) {
+    const uiManger = new UiManager(uiListElement, uiAppElement);
 }

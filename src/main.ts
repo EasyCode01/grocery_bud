@@ -65,3 +65,13 @@ class ListManager implements ListManagerInterface {
     return this._items
   }
 }
+
+const uiListElement = document.querySelector(
+  '.item__container'
+) as HTMLUListElement
+
+const uiAppElement = document.querySelector('.app') as HTMLDivElement
+
+if (uiListElement && uiAppElement) {
+  const uiManger = new UiManager(uiListElement, uiAppElement)
+}
