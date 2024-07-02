@@ -16,8 +16,26 @@ type UiElement = HTMLUListElement | HTMLDivElement
 interface UiManagerInterface {
   uiListElement: UiElement
   uiAppElement: UiElement
-  themeMode: string
-  switchMode(currentThemeMode: string): void
+  activateLightMode(): string
+  activateDarkMode(): string
+}
+
+class UiManager implements UiManagerInterface {
+  readonly uiListElement: UiElement
+  uiAppElement: UiElement
+
+  constructor(uiListElement: UiElement, uiAppElement: UiElement) {
+    this.uiListElement = uiListElement
+    this.uiAppElement = uiAppElement
+  }
+
+  activateLightMode(): string {
+    return `Light mode activated`
+  }
+
+  activateDarkMode(): string {
+    return `Dark mode activated`
+  }
 }
 
 class ListManager implements ListManagerInterface {
