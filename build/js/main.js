@@ -56,16 +56,27 @@ class ThemeManager {
     }
 }
 // LIST_MANAGER_CLASS
+const LIST_ITEMS = 'list-items';
 class ListManager {
     constructor(listWrapper) {
         this._items = [];
         this.listWrapper = listWrapper;
+        this.retrieveFromStorage();
+        this.generateItem();
     }
     addItem(item) {
         this._items.push(item);
+        this.saveToStorage();
         console.log('Add item successfully');
         this.generateItem();
         return true;
+    }
+    saveToStorage() {
+        localStorage.setItem(LIST_ITEMS, JSON.stringify(this._items));
+    }
+    retrieveFromStorage() {
+        const storedList = localStorage.getItem(LIST_ITEMS);
+        this._items = storedList ? JSON.parse(storedList) : [];
     }
     removeItem(id) {
         const initialLength = this._items.length;

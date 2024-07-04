@@ -12,6 +12,8 @@ interface ListManagerInterface {
   removeItem(id: string): boolean
   getItems(): ListItem[]
   generateItem(): void
+  saveToStorage(): void
+  retrieveFromStorage(): void
 }
 
 type UiElement = HTMLUListElement | HTMLDivElement
@@ -101,19 +103,33 @@ class ThemeManager implements ThemeManagerInterface {
 
 // LIST_MANAGER_CLASS
 
+const LIST_ITEMS: string = 'list-items'
+
 class ListManager implements ListManagerInterface {
   private _items: ListItem[] = []
   private listWrapper: UiElement
 
   constructor(listWrapper: UiElement) {
     this.listWrapper = listWrapper
+    this.retrieveFromStorage()
+    this.generateItem()
   }
 
   addItem(item: ListItem) {
     this._items.push(item)
+    this.saveToStorage()
     console.log('Add item successfully')
     this.generateItem()
     return true
+  }
+
+  saveToStorage(): void {
+    localStorage.setItem(LIST_ITEMS, JSON.stringify(this._items))
+  }
+
+  retrieveFromStorage(): void {
+    const storedList = localStorage.getItem(LIST_ITEMS)
+    this._items = storedList ? JSON.parse(storedList) : []
   }
 
   removeItem(id: string): boolean {
