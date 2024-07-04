@@ -138,6 +138,11 @@ const checkElement = (element: UiElement, desc: string): void => {
   }
 }
 
+const toggleHideClass = (element1: UiElement, element2: UiElement): void => {
+  element1.classList.toggle(HIDE_CLASS)
+  element2.classList.toggle(HIDE_CLASS)
+}
+
 const initializeUiManager = (
   optionsMenu: HTMLDivElement,
   optionsMenuIcon: HTMLDivElement
@@ -154,19 +159,14 @@ const initializeLightAndDarkModeButtons = (
   lightModeButton: UiElement,
   darkModeButton: UiElement
 ) => {
-  const toggleLightAndDarkButton = (): void => {
-    lightModeButton.classList.toggle(HIDE_CLASS)
-    darkModeButton.classList.toggle(HIDE_CLASS)
-  }
-
   lightModeButton.addEventListener('click', () => {
     themeManager.activateLightMode()
-    toggleLightAndDarkButton()
+    toggleHideClass(lightModeButton, darkModeButton)
   })
 
   darkModeButton.addEventListener('click', () => {
     themeManager.activateDarkMode()
-    toggleLightAndDarkButton()
+    toggleHideClass(lightModeButton, darkModeButton)
   })
 }
 

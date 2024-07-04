@@ -89,6 +89,10 @@ const checkElement = (element, desc) => {
         throw new Error(`${desc} not found`);
     }
 };
+const toggleHideClass = (element1, element2) => {
+    element1.classList.toggle(HIDE_CLASS);
+    element2.classList.toggle(HIDE_CLASS);
+};
 const initializeUiManager = (optionsMenu, optionsMenuIcon) => {
     checkElement(optionsMenu, 'Options Menu');
     checkElement(optionsMenuIcon, 'Options Menu');
@@ -96,17 +100,13 @@ const initializeUiManager = (optionsMenu, optionsMenuIcon) => {
     optionsMenuIcon.addEventListener('click', () => uiManager.toggleOptionMenu());
 };
 const initializeLightAndDarkModeButtons = (themeManager, lightModeButton, darkModeButton) => {
-    const toggleLightAndDarkButton = () => {
-        lightModeButton.classList.toggle(HIDE_CLASS);
-        darkModeButton.classList.toggle(HIDE_CLASS);
-    };
     lightModeButton.addEventListener('click', () => {
         themeManager.activateLightMode();
-        toggleLightAndDarkButton();
+        toggleHideClass(lightModeButton, darkModeButton);
     });
     darkModeButton.addEventListener('click', () => {
         themeManager.activateDarkMode();
-        toggleLightAndDarkButton();
+        toggleHideClass(lightModeButton, darkModeButton);
     });
 };
 const setInitialButtonState = (themeManager, lightModeButton, darkModeButton) => {
