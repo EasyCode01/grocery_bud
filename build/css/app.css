@@ -4,6 +4,13 @@
   box-sizing: border-box;
 }
 
+.dark__mode {
+  --bg-gradient-1: #2f2f2f; /* Dark variant of light beige */
+  --bg-gradient-2: #1c1c1c; /* Dark variant of light goldenrod */
+  --text-color: #e0e0e0; /* Light grey for text */
+  --white-color: #2f2f2f;
+}
+
 :root {
   --bg-gradient-1: #fdf5e6;
   --bg-gradient-2: #fff8dc;
@@ -179,6 +186,7 @@ ul {
 
 .bi-cart-dash-fill {
   font-size: 26px;
+  color: var(--text-color);
 }
 .nav__menu .three__dots {
   width: 30px;
@@ -188,6 +196,7 @@ ul {
   justify-content: center;
   font-size: 26px;
   cursor: pointer;
+  color: var(--text-color);
 }
 
 .press:active {
