@@ -44,10 +44,19 @@ ul {
   text-align: center;
   padding: 4px;
   margin-bottom: 20px;
-  color: var(--white-color);
-  background-color: red;
+  color: #fff;
+  letter-spacing: 1px;
+  word-spacing: 2px;
   border-radius: 4px;
   opacity: 0;
+}
+
+.success-msg {
+  background-color: var(--primary-accent-color);
+}
+
+.error-msg {
+  background-color: rgba(255, 0, 0, 0.651);
 }
 
 .app {
@@ -240,6 +249,7 @@ input:focus {
   padding: 6px;
   border-radius: 4px;
   transition: all 400ms ease;
+  margin-bottom: 10px;
 }
 
 .item__container .single__item:hover {

@@ -1,3 +1,5 @@
+// LISITEM INTERFACE
+
 interface ListItem {
   id: string
   name: string
@@ -9,6 +11,7 @@ interface ListManagerInterface {
   addItem(item: ListItem): boolean
   removeItem(id: string): boolean
   getItems(): ListItem[]
+  generateItem(): void
 }
 
 type UiElement = HTMLUListElement | HTMLDivElement
@@ -16,6 +19,8 @@ type UiElement = HTMLUListElement | HTMLDivElement
 const THEME_LIGHT = 'light'
 const THEME_DARK = 'dark'
 const HIDE_CLASS = 'hide'
+
+// UI INTERFACE
 
 interface UiManagerInterface {
   toggleOptionMenu(): string
@@ -27,6 +32,8 @@ interface ThemeManagerInterface {
   activateDarkMode(): string
   getThemeMode(): string
 }
+
+// UI MANAGER CLASS
 
 class UiManager implements UiManagerInterface {
   private isMenuOptionOpen: boolean = false
@@ -48,6 +55,8 @@ class UiManager implements UiManagerInterface {
     }
   }
 }
+
+// THEME_MANAGER_CLASS
 
 class ThemeManager implements ThemeManagerInterface {
   private _appWrapper: UiElement
@@ -90,12 +99,20 @@ class ThemeManager implements ThemeManagerInterface {
   }
 }
 
+// LIST_MANAGER_CLASS
+
 class ListManager implements ListManagerInterface {
   private _items: ListItem[] = []
+  private listWrapper: UiElement
+
+  constructor(listWrapper: UiElement) {
+    this.listWrapper = listWrapper
+  }
 
   addItem(item: ListItem) {
     this._items.push(item)
     console.log('Add item successfully')
+    this.generateItem()
     return true
   }
 
@@ -113,10 +130,30 @@ class ListManager implements ListManagerInterface {
     }
   }
 
+  generateItem(): void {
+    this.listWrapper.innerHTML = this._items
+      .map((item) => {
+        let { id, name, price, quantity } = item
+        return `
+         <li id="${id}" class="single__item">
+                <span class="item__name">${name}</span>
+                <span class="quantity__price">${quantity} x ${price}</span>
+                <div class="actions">
+                  <span class="press"><i class="bi bi-pencil-square"></i></span>
+                  <span class="press"><i class="bi bi-trash"></i></span>
+                </div>
+              </li>
+      `
+      })
+      .join('')
+  }
+
   getItems(): ListItem[] {
     return this._items
   }
 }
+
+//////////// Access DOM ELEMENTS /////////////////////////
 
 const uiListElement = document.querySelector(
   '.item__container'
@@ -132,7 +169,9 @@ const optionsMenu = document.querySelector('.options__menu') as HTMLDivElement
 
 const optionsMenuIcon = document.querySelector('.three__dots') as HTMLDivElement
 
-const checkElement = (element: UiElement, desc: string): void => {
+////////////// initialize functions ////////////////////
+
+const checkElement = (element: HTMLElement, desc: string): void => {
   if (!element) {
     throw new Error(`${desc} not found`)
   }
@@ -206,3 +245,131 @@ const initializeThemeManager = (
 
 initializeThemeManager(uiAppElement, lightModeButton, darkModeButton)
 initializeUiManager(optionsMenu, optionsMenuIcon)
+
+// Accessing form Elements
+
+const formList = document.querySelector('.grocery__form') as HTMLFormElement
+const nameInput = document.querySelector('#item__input') as HTMLInputElement
+const priceInput = document.querySelector('#item__price') as HTMLInputElement
+const quantityInput = document.querySelector('#item__qty') as HTMLInputElement
+let itemContaner = document.querySelector(
+  '.item__container'
+) as HTMLUListElement
+let notificationMessageInput = document.querySelector(
+  '.notification__msg'
+) as HTMLDivElement
+
+checkElement(formList, 'Form Element List')
+checkElement(nameInput, 'name input element')
+checkElement(priceInput, 'price input element')
+checkElement(quantityInput, 'quantity input element')
+checkElement(notificationMessageInput, 'Notification message input')
+checkElement(itemContaner, 'Item container')
+
+// send notification
+let timeoutId: number | null = null
+
+const sendNotificationMsg = (
+  element: HTMLDivElement,
+  message: string,
+  modifier: string
+) => {
+  if (timeoutId !== null) {
+    clearTimeout(timeoutId)
+    timeoutId = null
+  }
+  element.innerText = message
+  element.classList.add(modifier)
+  element.style.opacity = '1'
+
+  timeoutId = setTimeout(() => {
+    element.innerText = ''
+    element.classList.remove(modifier)
+    element.style.opacity = '0'
+    timeoutId = null
+  }, 2500)
+}
+
+// Validate form input
+const validateFormInput = (): boolean => {
+  if (nameInput.value === '') {
+    sendNotificationMsg(
+      notificationMessageInput,
+      'Name list cannot be empty',
+      'error-msg'
+    )
+    return false
+  }
+
+  if (priceInput.value === '') {
+    sendNotificationMsg(
+      notificationMessageInput,
+      'Price cannot be empty',
+      'error-msg'
+    )
+    return false
+  }
+
+  if (isNaN(parseInt(priceInput.value))) {
+    sendNotificationMsg(
+      notificationMessageInput,
+      'Price must be a number',
+      'error-msg'
+    )
+    return false
+  }
+
+  if (quantityInput.value === '') {
+    sendNotificationMsg(
+      notificationMessageInput,
+      'quantity cannot be empty',
+      'error-msg'
+    )
+    return false
+  }
+
+  return true
+}
+
+// generate id
+let itemId: number = 0
+const generateItemId = (): string => {
+  itemId++
+  const idPattern = 'item'
+  return `${idPattern}-${itemId}`
+}
+
+// intantiate List
+const list = new ListManager(itemContaner)
+
+const acceptItem = (): void => {
+  let item: ListItem = {
+    id: generateItemId(),
+    name: nameInput.value,
+    price: parseInt(priceInput.value),
+    quantity: parseInt(quantityInput.value),
+  }
+
+  list.addItem(item)
+  console.log(list.getItems())
+
+  sendNotificationMsg(
+    notificationMessageInput,
+    `${item.name} is successfully added`,
+    'success-msg'
+  )
+}
+
+const resetForm = (): void => {
+  nameInput.value = ''
+  priceInput.value = ''
+  quantityInput.value = ''
+}
+
+formList.addEventListener('submit', (e: Event) => {
+  e.preventDefault()
+  if (validateFormInput()) {
+    acceptItem()
+    resetForm()
+  }
+})

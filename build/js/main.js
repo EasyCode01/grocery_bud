@@ -1,7 +1,9 @@
 "use strict";
+// LISITEM INTERFACE
 const THEME_LIGHT = 'light';
 const THEME_DARK = 'dark';
 const HIDE_CLASS = 'hide';
+// UI MANAGER CLASS
 class UiManager {
     constructor(optionsMenu) {
         this.isMenuOptionOpen = false;
@@ -19,6 +21,7 @@ class UiManager {
         }
     }
 }
+// THEME_MANAGER_CLASS
 class ThemeManager {
     constructor(appWrapperElem) {
         this.themeMode = '';
@@ -52,13 +55,16 @@ class ThemeManager {
         return this.themeMode;
     }
 }
+// LIST_MANAGER_CLASS
 class ListManager {
-    constructor() {
+    constructor(listWrapper) {
         this._items = [];
+        this.listWrapper = listWrapper;
     }
     addItem(item) {
         this._items.push(item);
         console.log('Add item successfully');
+        this.generateItem();
         return true;
     }
     removeItem(id) {
@@ -74,16 +80,35 @@ class ListManager {
             return false;
         }
     }
+    generateItem() {
+        this.listWrapper.innerHTML = this._items
+            .map((item) => {
+            let { id, name, price, quantity } = item;
+            return `
+         <li id="${id}" class="single__item">
+                <span class="item__name">${name}</span>
+                <span class="quantity__price">${quantity} x ${price}</span>
+                <div class="actions">
+                  <span class="press"><i class="bi bi-pencil-square"></i></span>
+                  <span class="press"><i class="bi bi-trash"></i></span>
+                </div>
+              </li>
+      `;
+        })
+            .join('');
+    }
     getItems() {
         return this._items;
     }
 }
+//////////// Access DOM ELEMENTS /////////////////////////
 const uiListElement = document.querySelector('.item__container');
 const uiAppElement = document.querySelector('.app');
 const lightModeButton = document.querySelector('.light__switch');
 const darkModeButton = document.querySelector('.dark__switch');
 const optionsMenu = document.querySelector('.options__menu');
 const optionsMenuIcon = document.querySelector('.three__dots');
+////////////// initialize functions ////////////////////
 const checkElement = (element, desc) => {
     if (!element) {
         throw new Error(`${desc} not found`);
@@ -129,3 +154,85 @@ const initializeThemeManager = (uiAppElement, lightModeButton, darkModeButton) =
 };
 initializeThemeManager(uiAppElement, lightModeButton, darkModeButton);
 initializeUiManager(optionsMenu, optionsMenuIcon);
+// Accessing form Elements
+const formList = document.querySelector('.grocery__form');
+const nameInput = document.querySelector('#item__input');
+const priceInput = document.querySelector('#item__price');
+const quantityInput = document.querySelector('#item__qty');
+let itemContaner = document.querySelector('.item__container');
+let notificationMessageInput = document.querySelector('.notification__msg');
+checkElement(formList, 'Form Element List');
+checkElement(nameInput, 'name input element');
+checkElement(priceInput, 'price input element');
+checkElement(quantityInput, 'quantity input element');
+checkElement(notificationMessageInput, 'Notification message input');
+checkElement(itemContaner, 'Item container');
+// send notification
+let timeoutId = null;
+const sendNotificationMsg = (element, message, modifier) => {
+    if (timeoutId !== null) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+    }
+    element.innerText = message;
+    element.classList.add(modifier);
+    element.style.opacity = '1';
+    timeoutId = setTimeout(() => {
+        element.innerText = '';
+        element.classList.remove(modifier);
+        element.style.opacity = '0';
+        timeoutId = null;
+    }, 2500);
+};
+// Validate form input
+const validateFormInput = () => {
+    if (nameInput.value === '') {
+        sendNotificationMsg(notificationMessageInput, 'Name list cannot be empty', 'error-msg');
+        return false;
+    }
+    if (priceInput.value === '') {
+        sendNotificationMsg(notificationMessageInput, 'Price cannot be empty', 'error-msg');
+        return false;
+    }
+    if (isNaN(parseInt(priceInput.value))) {
+        sendNotificationMsg(notificationMessageInput, 'Price must be a number', 'error-msg');
+        return false;
+    }
+    if (quantityInput.value === '') {
+        sendNotificationMsg(notificationMessageInput, 'quantity cannot be empty', 'error-msg');
+        return false;
+    }
+    return true;
+};
+// generate id
+let itemId = 0;
+const generateItemId = () => {
+    itemId++;
+    const idPattern = 'item';
+    return `${idPattern}-${itemId}`;
+};
+// intantiate List
+const list = new ListManager(itemContaner);
+const acceptItem = () => {
+    let item = {
+        id: generateItemId(),
+        name: nameInput.value,
+        price: parseInt(priceInput.value),
+        quantity: parseInt(quantityInput.value),
+    };
+    list.addItem(item);
+    console.log(list.getItems());
+    sendNotificationMsg(notificationMessageInput, `${item.name} is successfully added`, 'success-msg');
+};
+const resetForm = () => {
+    nameInput.value = '';
+    priceInput.value = '';
+    quantityInput.value = '';
+};
+formList.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (validateFormInput()) {
+        acceptItem();
+        resetForm();
+    }
+});
