@@ -68,7 +68,7 @@ ul {
   border-radius: 6px;
   padding: 10px 20px;
   border: none;
-  color: var(--white-color);
+  color: #fff;
   cursor: pointer;
 }
 
@@ -177,7 +177,7 @@ ul {
   border-radius: 2px;
   padding: 2px 4px;
   background-color: var(--secondary-accent-color);
-  color: var(--white-color);
+  color: #fff;
   font-size: 18px;
   position: absolute;
   top: -10px;
@@ -244,6 +244,14 @@ input:focus {
 
 .item__container .single__item:hover {
   background-color: hsla(0, 0%, 80%, 0.404);
+}
+
+.single__item .item__name {
+  color: var(--text-color);
+}
+
+.single__item .quantity__price {
+  color: var(--text-color);
 }
 
 .single__item .actions {
