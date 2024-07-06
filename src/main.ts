@@ -1,33 +1,13 @@
-// LISITEM INTERFACE
-
-interface ListItem {
-  id: string
-  name: string
-  price: number
-  quantity: number
-}
-
-interface ListManagerInterface {
-  addItem(item: ListItem): boolean
-  removeItem(id: string): boolean
-  getItems(): ListItem[]
-  generateItem(): void
-  saveToStorage(): void
-  retrieveFromStorage(): void
-}
-
-type UiElement = HTMLUListElement | HTMLDivElement
-
+// APP CONSTANTS
 const THEME_LIGHT = 'light'
 const THEME_DARK = 'dark'
 const HIDE_CLASS = 'hide'
+const LIST_ITEMS: string = 'list-items'
 
-// UI INTERFACE
+// UI ELEMENT
+type UiElement = HTMLUListElement | HTMLDivElement
 
-interface UiManagerInterface {
-  toggleOptionMenu(): string
-}
-
+// THEME MANAGER INTERFACE
 interface ThemeManagerInterface {
   loadThemeState(): string
   activateLightMode(): string
@@ -35,31 +15,7 @@ interface ThemeManagerInterface {
   getThemeMode(): string
 }
 
-// UI MANAGER CLASS
-
-class UiManager implements UiManagerInterface {
-  private isMenuOptionOpen: boolean = false
-  private optionsMenu: UiElement
-
-  constructor(optionsMenu: UiElement) {
-    this.optionsMenu = optionsMenu
-  }
-
-  toggleOptionMenu(): string {
-    this.isMenuOptionOpen = !this.isMenuOptionOpen
-
-    if (this.isMenuOptionOpen) {
-      this.optionsMenu.classList.remove(HIDE_CLASS)
-      return 'Menu options opened'
-    } else {
-      this.optionsMenu.classList.add(HIDE_CLASS)
-      return 'Menu options closed'
-    }
-  }
-}
-
 // THEME_MANAGER_CLASS
-
 class ThemeManager implements ThemeManagerInterface {
   private _appWrapper: UiElement
   private themeMode: string = ''
@@ -99,10 +55,51 @@ class ThemeManager implements ThemeManagerInterface {
   }
 }
 
+// UI INTERFACE
+interface UiManagerInterface {
+  toggleOptionMenu(): string
+}
+
+// UI MANAGER CLASS
+class UiManager implements UiManagerInterface {
+  private isMenuOptionOpen: boolean = false
+  private optionsMenu: UiElement
+
+  constructor(optionsMenu: UiElement) {
+    this.optionsMenu = optionsMenu
+  }
+
+  toggleOptionMenu(): string {
+    this.isMenuOptionOpen = !this.isMenuOptionOpen
+
+    if (this.isMenuOptionOpen) {
+      this.optionsMenu.classList.remove(HIDE_CLASS)
+      return 'Menu options opened'
+    } else {
+      this.optionsMenu.classList.add(HIDE_CLASS)
+      return 'Menu options closed'
+    }
+  }
+}
+
+// LISITEM INTERFACE
+interface ListItem {
+  id: string
+  name: string
+  price: number
+  quantity: number
+}
+
+interface ListManagerInterface {
+  addItem(item: ListItem): boolean
+  removeItem(id: string): boolean
+  getItems(): ListItem[]
+  generateItem(): void
+  saveToStorage(): void
+  retrieveFromStorage(): void
+}
+
 // LIST_MANAGER_CLASS
-
-const LIST_ITEMS: string = 'list-items'
-
 class ListManager implements ListManagerInterface {
   private _items: ListItem[] = []
   private listWrapper: UiElement
