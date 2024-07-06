@@ -71,6 +71,12 @@ class UiManager {
         })
             .join('');
     }
+    updateTotalLength(length) {
+        this.userInterfaceElement.totalItemElem.innerText = length.toString();
+    }
+    updateTotalPrice(price) {
+        this.userInterfaceElement.totalPriceElem.innerText = price.toString();
+    }
 }
 // LIST_MANAGER_CLASS
 class ListManager {

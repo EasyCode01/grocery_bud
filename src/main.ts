@@ -69,6 +69,8 @@ interface UiManagerInterface {
   // method signature
   toggleOptionMenu(): string
   generateItem(items: ListItem[]): void
+  updateTotalLength(length: number): void
+  updateTotalPrice(price: number): void
 }
 
 // UI MANAGER CLASS
@@ -113,6 +115,14 @@ class UiManager implements UiManagerInterface {
       `
       })
       .join('')
+  }
+
+  updateTotalLength(length: number): void {
+    this.userInterfaceElement.totalItemElem.innerText = length.toString()
+  }
+
+  updateTotalPrice(price: number): void {
+    this.userInterfaceElement.totalPriceElem.innerText = price.toString()
   }
 }
 
