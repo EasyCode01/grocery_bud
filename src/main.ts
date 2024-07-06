@@ -115,10 +115,9 @@ class ListManager implements ListManagerInterface {
     this.generateItem()
   }
 
-  addItem(item: ListItem) {
+  addItem(item: ListItem): boolean {
     this._items.push(item)
     this.saveToStorage()
-    console.log('Add item successfully')
     this.generateItem()
     return true
   }
@@ -135,13 +134,14 @@ class ListManager implements ListManagerInterface {
   removeItem(id: string): boolean {
     const initialLength = this._items.length
     this._items = this._items.filter((item) => item.id !== id)
+    this.saveToStorage()
+    this.generateItem()
+
     const itemRemoved = this._items.length < initialLength
 
     if (itemRemoved) {
-      console.log('Removed item successfully')
       return true
     } else {
-      console.log('Item not found')
       return false
     }
   }
@@ -155,13 +155,24 @@ class ListManager implements ListManagerInterface {
                 <span class="item__name">${name}</span>
                 <span class="quantity__price">${quantity} x ${price}</span>
                 <div class="actions">
-                  <span class="press"><i class="bi bi-pencil-square"></i></span>
-                  <span class="press"><i class="bi bi-trash"></i></span>
+                  <span><i class="bi bi-pencil-square"></i></span>
+                  <span class="remove-btn-${id} press"><i class="bi bi-trash"></i></span>
                 </div>
               </li>
       `
       })
       .join('')
+
+    // add event listener to the delete icon
+    this._items.forEach((item) => {
+      let { id } = item
+      const removeBtn = document.querySelector(`.remove-btn-${id}`)
+      if (removeBtn) {
+        removeBtn.addEventListener('click', () => {
+          this.removeItem(`${id}`)
+        })
+      }
+    })
   }
 
   getItems(): ListItem[] {
