@@ -91,6 +91,21 @@ class ListManager {
         const storedList = localStorage.getItem(LIST_ITEMS);
         this._items = storedList ? JSON.parse(storedList) : [];
     }
+    getItems() {
+        return this._items;
+    }
+    clearItems() {
+        this._items = [];
+    }
+    getItemsLength() {
+        return this._items.length;
+    }
+    getTotalPrice() {
+        const total = this._items.map((item) => item.price * item.quantity);
+        const sum = total.reduce((acc, cur) => acc + cur, 0);
+        return sum;
+    }
+    // not sorted
     removeItem(id) {
         const initialLength = this._items.length;
         this._items = this._items.filter((item) => item.id !== id);
@@ -102,17 +117,6 @@ class ListManager {
         else {
             return false;
         }
-    }
-    getItems() {
-        return this._items;
-    }
-    getItemsLength() {
-        return this._items.length;
-    }
-    clearItems() {
-        this._items = [];
-        this.getItemsLength();
-        this.saveToStorage();
     }
 }
 //////////// Access DOM ELEMENTS /////////////////////////

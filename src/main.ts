@@ -157,6 +157,29 @@ class ListManager implements ListManagerInterface {
     this._items = storedList ? JSON.parse(storedList) : []
   }
 
+  getItems(): ListItem[] {
+    return this._items
+  }
+
+  clearItems(): void {
+    this._items = []
+  }
+
+  getItemsLength(): number {
+    return this._items.length
+  }
+
+  getTotalPrice(): number {
+    const total: number[] = this._items.map(
+      (item) => item.price * item.quantity
+    )
+
+    const sum: number = total.reduce((acc, cur) => acc + cur, 0)
+    return sum
+  }
+
+  // not sorted
+
   removeItem(id: string): boolean {
     const initialLength = this._items.length
     this._items = this._items.filter((item) => item.id !== id)
@@ -169,21 +192,6 @@ class ListManager implements ListManagerInterface {
     } else {
       return false
     }
-  }
-
-  getItems(): ListItem[] {
-    return this._items
-  }
-
-  getItemsLength(): number {
-    return this._items.length
-  }
-
-  clearItems(): void {
-    this._items = []
-
-    this.getItemsLength()
-    this.saveToStorage()
   }
 }
 
