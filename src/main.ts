@@ -180,6 +180,14 @@ class ListManager implements ListManagerInterface {
   getItemsLength(): number {
     return this._items.length
   }
+
+  clearItems(): void {
+    this._items = []
+
+    this.generateItem()
+    this.getItemsLength()
+    this.saveToStorage()
+  }
 }
 
 //////////// Access DOM ELEMENTS /////////////////////////
@@ -281,6 +289,9 @@ const formList = document.querySelector('.grocery__form') as HTMLFormElement
 const nameInput = document.querySelector('#item__input') as HTMLInputElement
 const priceInput = document.querySelector('#item__price') as HTMLInputElement
 const quantityInput = document.querySelector('#item__qty') as HTMLInputElement
+const clearItemsBtn = document.querySelector(
+  '.clear-items'
+) as HTMLButtonElement
 let totalLengthElem = document.querySelector('.cart__total') as HTMLDivElement
 let itemContaner = document.querySelector(
   '.item__container'
@@ -294,6 +305,7 @@ checkElement(nameInput, 'name input element')
 checkElement(priceInput, 'price input element')
 checkElement(quantityInput, 'quantity input element')
 checkElement(totalLengthElem, 'Total length element')
+checkElement(clearItemsBtn, 'Clear items button')
 checkElement(notificationMessageInput, 'Notification message input')
 checkElement(itemContaner, 'Item container')
 
@@ -401,8 +413,12 @@ const resetForm = (): void => {
 const calculateItemLength = (): void => {
   totalLengthElem.innerText = list.getItemsLength().toString()
 }
-
 calculateItemLength()
+
+// clear all items
+clearItemsBtn.addEventListener('click', () => {
+  list.clearItems()
+})
 
 formList.addEventListener('submit', (e: Event) => {
   e.preventDefault()

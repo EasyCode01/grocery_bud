@@ -121,6 +121,12 @@ class ListManager {
     getItemsLength() {
         return this._items.length;
     }
+    clearItems() {
+        this._items = [];
+        this.generateItem();
+        this.getItemsLength();
+        this.saveToStorage();
+    }
 }
 //////////// Access DOM ELEMENTS /////////////////////////
 const uiListElement = document.querySelector('.item__container');
@@ -180,6 +186,7 @@ const formList = document.querySelector('.grocery__form');
 const nameInput = document.querySelector('#item__input');
 const priceInput = document.querySelector('#item__price');
 const quantityInput = document.querySelector('#item__qty');
+const clearItemsBtn = document.querySelector('.clear-items');
 let totalLengthElem = document.querySelector('.cart__total');
 let itemContaner = document.querySelector('.item__container');
 let notificationMessageInput = document.querySelector('.notification__msg');
@@ -188,6 +195,7 @@ checkElement(nameInput, 'name input element');
 checkElement(priceInput, 'price input element');
 checkElement(quantityInput, 'quantity input element');
 checkElement(totalLengthElem, 'Total length element');
+checkElement(clearItemsBtn, 'Clear items button');
 checkElement(notificationMessageInput, 'Notification message input');
 checkElement(itemContaner, 'Item container');
 // send notification
@@ -257,6 +265,10 @@ const calculateItemLength = () => {
     totalLengthElem.innerText = list.getItemsLength().toString();
 };
 calculateItemLength();
+// clear all items
+clearItemsBtn.addEventListener('click', () => {
+    list.clearItems();
+});
 formList.addEventListener('submit', (e) => {
     e.preventDefault();
     if (validateFormInput()) {
