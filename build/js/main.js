@@ -54,43 +54,8 @@ class UiManager {
             return 'Menu options closed';
         }
     }
-}
-// LIST_MANAGER_CLASS
-class ListManager {
-    constructor(listWrapper) {
-        this._items = [];
-        this.listWrapper = listWrapper;
-        this.retrieveFromStorage();
-        this.generateItem();
-    }
-    addItem(item) {
-        this._items.push(item);
-        this.saveToStorage();
-        this.generateItem();
-        return true;
-    }
-    saveToStorage() {
-        localStorage.setItem(LIST_ITEMS, JSON.stringify(this._items));
-    }
-    retrieveFromStorage() {
-        const storedList = localStorage.getItem(LIST_ITEMS);
-        this._items = storedList ? JSON.parse(storedList) : [];
-    }
-    removeItem(id) {
-        const initialLength = this._items.length;
-        this._items = this._items.filter((item) => item.id !== id);
-        this.saveToStorage();
-        this.generateItem();
-        const itemRemoved = this._items.length < initialLength;
-        if (itemRemoved) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    generateItem() {
-        this.listWrapper.innerHTML = this._items
+    generateItem(items) {
+        userInterfaeElement.itemWrapperElem.innerHTML = items
             .map((item) => {
             let { id, name, price, quantity } = item;
             return `
@@ -105,16 +70,38 @@ class ListManager {
       `;
         })
             .join('');
-        // add event listener to the delete icon
-        this._items.forEach((item) => {
-            let { id } = item;
-            const removeBtn = document.querySelector(`.remove-btn-${id}`);
-            if (removeBtn) {
-                removeBtn.addEventListener('click', () => {
-                    this.removeItem(`${id}`);
-                });
-            }
-        });
+    }
+}
+// LIST_MANAGER_CLASS
+class ListManager {
+    constructor(listWrapper) {
+        this._items = [];
+        this.listWrapper = listWrapper;
+        this.retrieveFromStorage();
+    }
+    addItem(item) {
+        this._items.push(item);
+        this.saveToStorage();
+        return true;
+    }
+    saveToStorage() {
+        localStorage.setItem(LIST_ITEMS, JSON.stringify(this._items));
+    }
+    retrieveFromStorage() {
+        const storedList = localStorage.getItem(LIST_ITEMS);
+        this._items = storedList ? JSON.parse(storedList) : [];
+    }
+    removeItem(id) {
+        const initialLength = this._items.length;
+        this._items = this._items.filter((item) => item.id !== id);
+        this.saveToStorage();
+        const itemRemoved = this._items.length < initialLength;
+        if (itemRemoved) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     getItems() {
         return this._items;
@@ -124,7 +111,6 @@ class ListManager {
     }
     clearItems() {
         this._items = [];
-        this.generateItem();
         this.getItemsLength();
         this.saveToStorage();
     }

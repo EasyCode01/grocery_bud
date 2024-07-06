@@ -68,6 +68,7 @@ interface UiManagerInterface {
 
   // method signature
   toggleOptionMenu(): string
+  generateItem(items: ListItem[]): void
 }
 
 // UI MANAGER CLASS
@@ -95,6 +96,24 @@ class UiManager implements UiManagerInterface {
       return 'Menu options closed'
     }
   }
+
+  generateItem(items: ListItem[]): void {
+    userInterfaeElement.itemWrapperElem.innerHTML = items
+      .map((item) => {
+        let { id, name, price, quantity } = item
+        return `
+         <li id="${id}" class="single__item">
+                <span class="item__name">${name}</span>
+                <span class="quantity__price">${quantity} x ${price}</span>
+                <div class="actions">
+                  <span><i class="bi bi-pencil-square"></i></span>
+                  <span class="remove-btn-${id} press"><i class="bi bi-trash"></i></span>
+                </div>
+              </li>
+      `
+      })
+      .join('')
+  }
 }
 
 // LISITEM INTERFACE
@@ -109,7 +128,6 @@ interface ListManagerInterface {
   addItem(item: ListItem): boolean
   removeItem(id: string): boolean
   getItems(): ListItem[]
-  generateItem(): void
   saveToStorage(): void
   retrieveFromStorage(): void
 }
@@ -122,13 +140,11 @@ class ListManager implements ListManagerInterface {
   constructor(listWrapper: UiElement) {
     this.listWrapper = listWrapper
     this.retrieveFromStorage()
-    this.generateItem()
   }
 
   addItem(item: ListItem): boolean {
     this._items.push(item)
     this.saveToStorage()
-    this.generateItem()
     return true
   }
 
@@ -145,7 +161,6 @@ class ListManager implements ListManagerInterface {
     const initialLength = this._items.length
     this._items = this._items.filter((item) => item.id !== id)
     this.saveToStorage()
-    this.generateItem()
 
     const itemRemoved = this._items.length < initialLength
 
@@ -154,35 +169,6 @@ class ListManager implements ListManagerInterface {
     } else {
       return false
     }
-  }
-
-  generateItem(): void {
-    this.listWrapper.innerHTML = this._items
-      .map((item) => {
-        let { id, name, price, quantity } = item
-        return `
-         <li id="${id}" class="single__item">
-                <span class="item__name">${name}</span>
-                <span class="quantity__price">${quantity} x ${price}</span>
-                <div class="actions">
-                  <span><i class="bi bi-pencil-square"></i></span>
-                  <span class="remove-btn-${id} press"><i class="bi bi-trash"></i></span>
-                </div>
-              </li>
-      `
-      })
-      .join('')
-
-    // add event listener to the delete icon
-    this._items.forEach((item) => {
-      let { id } = item
-      const removeBtn = document.querySelector(`.remove-btn-${id}`)
-      if (removeBtn) {
-        removeBtn.addEventListener('click', () => {
-          this.removeItem(`${id}`)
-        })
-      }
-    })
   }
 
   getItems(): ListItem[] {
@@ -196,7 +182,6 @@ class ListManager implements ListManagerInterface {
   clearItems(): void {
     this._items = []
 
-    this.generateItem()
     this.getItemsLength()
     this.saveToStorage()
   }
