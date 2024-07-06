@@ -84,7 +84,6 @@ class ThemeManager implements ThemeManagerInterface {
     this._appWrapper.classList.remove('dark__mode')
     this.themeMode = THEME_LIGHT
     localStorage.setItem('theme', JSON.stringify(this.themeMode))
-    console.log('Light mode activated')
     return 'Light mode activated'
   }
 
@@ -92,7 +91,6 @@ class ThemeManager implements ThemeManagerInterface {
     this._appWrapper.classList.add('dark__mode')
     this.themeMode = THEME_DARK
     localStorage.setItem('theme', JSON.stringify(this.themeMode))
-    console.log('Dark mode activated')
     return 'Dark mode activated'
   }
 
@@ -177,6 +175,10 @@ class ListManager implements ListManagerInterface {
 
   getItems(): ListItem[] {
     return this._items
+  }
+
+  getItemsLength(): number {
+    return this._items.length
   }
 }
 
@@ -279,6 +281,7 @@ const formList = document.querySelector('.grocery__form') as HTMLFormElement
 const nameInput = document.querySelector('#item__input') as HTMLInputElement
 const priceInput = document.querySelector('#item__price') as HTMLInputElement
 const quantityInput = document.querySelector('#item__qty') as HTMLInputElement
+let totalLengthElem = document.querySelector('.cart__total') as HTMLDivElement
 let itemContaner = document.querySelector(
   '.item__container'
 ) as HTMLUListElement
@@ -290,6 +293,7 @@ checkElement(formList, 'Form Element List')
 checkElement(nameInput, 'name input element')
 checkElement(priceInput, 'price input element')
 checkElement(quantityInput, 'quantity input element')
+checkElement(totalLengthElem, 'Total length element')
 checkElement(notificationMessageInput, 'Notification message input')
 checkElement(itemContaner, 'Item container')
 
@@ -378,6 +382,7 @@ const acceptItem = (): void => {
   }
 
   list.addItem(item)
+  calculateItemLength()
   console.log(list.getItems())
 
   sendNotificationMsg(
@@ -392,6 +397,12 @@ const resetForm = (): void => {
   priceInput.value = ''
   quantityInput.value = ''
 }
+
+const calculateItemLength = (): void => {
+  totalLengthElem.innerText = list.getItemsLength().toString()
+}
+
+calculateItemLength()
 
 formList.addEventListener('submit', (e: Event) => {
   e.preventDefault()

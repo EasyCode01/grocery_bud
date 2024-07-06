@@ -41,14 +41,12 @@ class ThemeManager {
         this._appWrapper.classList.remove('dark__mode');
         this.themeMode = THEME_LIGHT;
         localStorage.setItem('theme', JSON.stringify(this.themeMode));
-        console.log('Light mode activated');
         return 'Light mode activated';
     }
     activateDarkMode() {
         this._appWrapper.classList.add('dark__mode');
         this.themeMode = THEME_DARK;
         localStorage.setItem('theme', JSON.stringify(this.themeMode));
-        console.log('Dark mode activated');
         return 'Dark mode activated';
     }
     getThemeMode() {
@@ -120,6 +118,9 @@ class ListManager {
     getItems() {
         return this._items;
     }
+    getItemsLength() {
+        return this._items.length;
+    }
 }
 //////////// Access DOM ELEMENTS /////////////////////////
 const uiListElement = document.querySelector('.item__container');
@@ -179,12 +180,14 @@ const formList = document.querySelector('.grocery__form');
 const nameInput = document.querySelector('#item__input');
 const priceInput = document.querySelector('#item__price');
 const quantityInput = document.querySelector('#item__qty');
+let totalLengthElem = document.querySelector('.cart__total');
 let itemContaner = document.querySelector('.item__container');
 let notificationMessageInput = document.querySelector('.notification__msg');
 checkElement(formList, 'Form Element List');
 checkElement(nameInput, 'name input element');
 checkElement(priceInput, 'price input element');
 checkElement(quantityInput, 'quantity input element');
+checkElement(totalLengthElem, 'Total length element');
 checkElement(notificationMessageInput, 'Notification message input');
 checkElement(itemContaner, 'Item container');
 // send notification
@@ -241,6 +244,7 @@ const acceptItem = () => {
         quantity: parseInt(quantityInput.value),
     };
     list.addItem(item);
+    calculateItemLength();
     console.log(list.getItems());
     sendNotificationMsg(notificationMessageInput, `${item.name} is successfully added`, 'success-msg');
 };
@@ -249,6 +253,10 @@ const resetForm = () => {
     priceInput.value = '';
     quantityInput.value = '';
 };
+const calculateItemLength = () => {
+    totalLengthElem.innerText = list.getItemsLength().toString();
+};
+calculateItemLength();
 formList.addEventListener('submit', (e) => {
     e.preventDefault();
     if (validateFormInput()) {
