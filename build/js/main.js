@@ -1,26 +1,9 @@
 "use strict";
-// LISITEM INTERFACE
+// APP CONSTANTS
 const THEME_LIGHT = 'light';
 const THEME_DARK = 'dark';
 const HIDE_CLASS = 'hide';
-// UI MANAGER CLASS
-class UiManager {
-    constructor(optionsMenu) {
-        this.isMenuOptionOpen = false;
-        this.optionsMenu = optionsMenu;
-    }
-    toggleOptionMenu() {
-        this.isMenuOptionOpen = !this.isMenuOptionOpen;
-        if (this.isMenuOptionOpen) {
-            this.optionsMenu.classList.remove(HIDE_CLASS);
-            return 'Menu options opened';
-        }
-        else {
-            this.optionsMenu.classList.add(HIDE_CLASS);
-            return 'Menu options closed';
-        }
-    }
-}
+const LIST_ITEMS = 'list-items';
 // THEME_MANAGER_CLASS
 class ThemeManager {
     constructor(appWrapperElem) {
@@ -53,8 +36,26 @@ class ThemeManager {
         return this.themeMode;
     }
 }
+// UI MANAGER CLASS
+class UiManager {
+    constructor(optionsMenu, userInterfaceElement) {
+        this.isMenuOptionOpen = false;
+        this.optionsMenu = optionsMenu;
+        this.userInterfaceElement = userInterfaceElement;
+    }
+    toggleOptionMenu() {
+        this.isMenuOptionOpen = !this.isMenuOptionOpen;
+        if (this.isMenuOptionOpen) {
+            this.optionsMenu.classList.remove(HIDE_CLASS);
+            return 'Menu options opened';
+        }
+        else {
+            this.optionsMenu.classList.add(HIDE_CLASS);
+            return 'Menu options closed';
+        }
+    }
+}
 // LIST_MANAGER_CLASS
-const LIST_ITEMS = 'list-items';
 class ListManager {
     constructor(listWrapper) {
         this._items = [];
@@ -135,6 +136,10 @@ const lightModeButton = document.querySelector('.light__switch');
 const darkModeButton = document.querySelector('.dark__switch');
 const optionsMenu = document.querySelector('.options__menu');
 const optionsMenuIcon = document.querySelector('.three__dots');
+let totalPriceElem = document.querySelector('#total__price');
+let totalItemElem = document.querySelector('.cart__total');
+let itemContainer = document.querySelector('.item__container');
+let notificationMessageElem = document.querySelector('.notification__msg');
 ////////////// initialize functions ////////////////////
 const checkElement = (element, desc) => {
     if (!element) {
@@ -145,10 +150,21 @@ const toggleHideClass = (element1, element2) => {
     element1.classList.toggle(HIDE_CLASS);
     element2.classList.toggle(HIDE_CLASS);
 };
+// User interface elements
+const userInterfaeElement = {
+    totalPriceElem,
+    totalItemElem,
+    itemWrapperElem: uiListElement,
+    notificationMsgElem: notificationMessageElem,
+};
 const initializeUiManager = (optionsMenu, optionsMenuIcon) => {
     checkElement(optionsMenu, 'Options Menu');
     checkElement(optionsMenuIcon, 'Options Menu');
-    const uiManager = new UiManager(optionsMenu);
+    checkElement(userInterfaeElement.totalPriceElem, 'total price element');
+    checkElement(userInterfaeElement.totalItemElem, 'total item element');
+    checkElement(userInterfaeElement.itemWrapperElem, 'item wrpper element');
+    checkElement(userInterfaeElement.notificationMsgElem, 'notification message element');
+    const uiManager = new UiManager(optionsMenu, userInterfaeElement);
     optionsMenuIcon.addEventListener('click', () => uiManager.toggleOptionMenu());
 };
 const initializeLightAndDarkModeButtons = (themeManager, lightModeButton, darkModeButton) => {
@@ -187,17 +203,13 @@ const nameInput = document.querySelector('#item__input');
 const priceInput = document.querySelector('#item__price');
 const quantityInput = document.querySelector('#item__qty');
 const clearItemsBtn = document.querySelector('.clear-items');
-let totalLengthElem = document.querySelector('.cart__total');
-let itemContaner = document.querySelector('.item__container');
-let notificationMessageInput = document.querySelector('.notification__msg');
 checkElement(formList, 'Form Element List');
 checkElement(nameInput, 'name input element');
 checkElement(priceInput, 'price input element');
 checkElement(quantityInput, 'quantity input element');
-checkElement(totalLengthElem, 'Total length element');
 checkElement(clearItemsBtn, 'Clear items button');
-checkElement(notificationMessageInput, 'Notification message input');
-checkElement(itemContaner, 'Item container');
+checkElement(notificationMessageElem, 'Notification message input');
+checkElement(itemContainer, 'Item container');
 // send notification
 let timeoutId = null;
 const sendNotificationMsg = (element, message, modifier) => {
@@ -218,19 +230,19 @@ const sendNotificationMsg = (element, message, modifier) => {
 // Validate form input
 const validateFormInput = () => {
     if (nameInput.value === '') {
-        sendNotificationMsg(notificationMessageInput, 'Name list cannot be empty', 'error-msg');
+        sendNotificationMsg(notificationMessageElem, 'Name list cannot be empty', 'error-msg');
         return false;
     }
     if (priceInput.value === '') {
-        sendNotificationMsg(notificationMessageInput, 'Price cannot be empty', 'error-msg');
+        sendNotificationMsg(notificationMessageElem, 'Price cannot be empty', 'error-msg');
         return false;
     }
     if (isNaN(parseInt(priceInput.value))) {
-        sendNotificationMsg(notificationMessageInput, 'Price must be a number', 'error-msg');
+        sendNotificationMsg(notificationMessageElem, 'Price must be a number', 'error-msg');
         return false;
     }
     if (quantityInput.value === '') {
-        sendNotificationMsg(notificationMessageInput, 'quantity cannot be empty', 'error-msg');
+        sendNotificationMsg(notificationMessageElem, 'quantity cannot be empty', 'error-msg');
         return false;
     }
     return true;
@@ -243,7 +255,7 @@ const generateItemId = () => {
     return `${idPattern}-${itemId}`;
 };
 // intantiate List
-const list = new ListManager(itemContaner);
+const list = new ListManager(itemContainer);
 const acceptItem = () => {
     let item = {
         id: generateItemId(),
@@ -252,19 +264,14 @@ const acceptItem = () => {
         quantity: parseInt(quantityInput.value),
     };
     list.addItem(item);
-    calculateItemLength();
     console.log(list.getItems());
-    sendNotificationMsg(notificationMessageInput, `${item.name} is successfully added`, 'success-msg');
+    sendNotificationMsg(notificationMessageElem, `${item.name} is successfully added`, 'success-msg');
 };
 const resetForm = () => {
     nameInput.value = '';
     priceInput.value = '';
     quantityInput.value = '';
 };
-const calculateItemLength = () => {
-    totalLengthElem.innerText = list.getItemsLength().toString();
-};
-calculateItemLength();
 // clear all items
 clearItemsBtn.addEventListener('click', () => {
     list.clearItems();

@@ -55,8 +55,18 @@ class ThemeManager implements ThemeManagerInterface {
   }
 }
 
-// UI INTERFACE
+// UI MANAGER INTERFACE
+interface UiElementInterface {
+  totalPriceElem: HTMLSpanElement
+  totalItemElem: HTMLSpanElement
+  itemWrapperElem: HTMLUListElement
+  notificationMsgElem: HTMLDivElement
+}
+
 interface UiManagerInterface {
+  userInterfaceElement: UiElementInterface
+
+  // method signature
   toggleOptionMenu(): string
 }
 
@@ -64,9 +74,14 @@ interface UiManagerInterface {
 class UiManager implements UiManagerInterface {
   private isMenuOptionOpen: boolean = false
   private optionsMenu: UiElement
+  userInterfaceElement: UiElementInterface
 
-  constructor(optionsMenu: UiElement) {
+  constructor(
+    optionsMenu: UiElement,
+    userInterfaceElement: UiElementInterface
+  ) {
     this.optionsMenu = optionsMenu
+    this.userInterfaceElement = userInterfaceElement
   }
 
   toggleOptionMenu(): string {
@@ -191,7 +206,7 @@ class ListManager implements ListManagerInterface {
 
 const uiListElement = document.querySelector(
   '.item__container'
-) as HTMLUListElement | null
+) as HTMLUListElement
 const uiAppElement = document.querySelector('.app') as HTMLDivElement
 
 const lightModeButton = document.querySelector(
@@ -202,6 +217,18 @@ const darkModeButton = document.querySelector('.dark__switch') as HTMLDivElement
 const optionsMenu = document.querySelector('.options__menu') as HTMLDivElement
 
 const optionsMenuIcon = document.querySelector('.three__dots') as HTMLDivElement
+
+let totalPriceElem = document.querySelector('#total__price') as HTMLSpanElement
+
+let totalItemElem = document.querySelector('.cart__total') as HTMLSpanElement
+
+let itemContainer = document.querySelector(
+  '.item__container'
+) as HTMLUListElement
+
+let notificationMessageElem = document.querySelector(
+  '.notification__msg'
+) as HTMLDivElement
 
 ////////////// initialize functions ////////////////////
 
@@ -216,14 +243,29 @@ const toggleHideClass = (element1: UiElement, element2: UiElement): void => {
   element2.classList.toggle(HIDE_CLASS)
 }
 
+// User interface elements
+const userInterfaeElement: UiElementInterface = {
+  totalPriceElem,
+  totalItemElem,
+  itemWrapperElem: uiListElement,
+  notificationMsgElem: notificationMessageElem,
+}
+
 const initializeUiManager = (
   optionsMenu: HTMLDivElement,
   optionsMenuIcon: HTMLDivElement
 ) => {
   checkElement(optionsMenu, 'Options Menu')
   checkElement(optionsMenuIcon, 'Options Menu')
+  checkElement(userInterfaeElement.totalPriceElem, 'total price element')
+  checkElement(userInterfaeElement.totalItemElem, 'total item element')
+  checkElement(userInterfaeElement.itemWrapperElem, 'item wrpper element')
+  checkElement(
+    userInterfaeElement.notificationMsgElem,
+    'notification message element'
+  )
 
-  const uiManager = new UiManager(optionsMenu)
+  const uiManager = new UiManager(optionsMenu, userInterfaeElement)
   optionsMenuIcon.addEventListener('click', () => uiManager.toggleOptionMenu())
 }
 
@@ -289,22 +331,14 @@ const quantityInput = document.querySelector('#item__qty') as HTMLInputElement
 const clearItemsBtn = document.querySelector(
   '.clear-items'
 ) as HTMLButtonElement
-let totalLengthElem = document.querySelector('.cart__total') as HTMLDivElement
-let itemContaner = document.querySelector(
-  '.item__container'
-) as HTMLUListElement
-let notificationMessageInput = document.querySelector(
-  '.notification__msg'
-) as HTMLDivElement
 
 checkElement(formList, 'Form Element List')
 checkElement(nameInput, 'name input element')
 checkElement(priceInput, 'price input element')
 checkElement(quantityInput, 'quantity input element')
-checkElement(totalLengthElem, 'Total length element')
 checkElement(clearItemsBtn, 'Clear items button')
-checkElement(notificationMessageInput, 'Notification message input')
-checkElement(itemContaner, 'Item container')
+checkElement(notificationMessageElem, 'Notification message input')
+checkElement(itemContainer, 'Item container')
 
 // send notification
 let timeoutId: number | null = null
@@ -334,7 +368,7 @@ const sendNotificationMsg = (
 const validateFormInput = (): boolean => {
   if (nameInput.value === '') {
     sendNotificationMsg(
-      notificationMessageInput,
+      notificationMessageElem,
       'Name list cannot be empty',
       'error-msg'
     )
@@ -343,7 +377,7 @@ const validateFormInput = (): boolean => {
 
   if (priceInput.value === '') {
     sendNotificationMsg(
-      notificationMessageInput,
+      notificationMessageElem,
       'Price cannot be empty',
       'error-msg'
     )
@@ -352,7 +386,7 @@ const validateFormInput = (): boolean => {
 
   if (isNaN(parseInt(priceInput.value))) {
     sendNotificationMsg(
-      notificationMessageInput,
+      notificationMessageElem,
       'Price must be a number',
       'error-msg'
     )
@@ -361,7 +395,7 @@ const validateFormInput = (): boolean => {
 
   if (quantityInput.value === '') {
     sendNotificationMsg(
-      notificationMessageInput,
+      notificationMessageElem,
       'quantity cannot be empty',
       'error-msg'
     )
@@ -380,7 +414,7 @@ const generateItemId = (): string => {
 }
 
 // intantiate List
-const list = new ListManager(itemContaner)
+const list = new ListManager(itemContainer)
 
 const acceptItem = (): void => {
   let item: ListItem = {
@@ -391,11 +425,10 @@ const acceptItem = (): void => {
   }
 
   list.addItem(item)
-  calculateItemLength()
   console.log(list.getItems())
 
   sendNotificationMsg(
-    notificationMessageInput,
+    notificationMessageElem,
     `${item.name} is successfully added`,
     'success-msg'
   )
@@ -406,11 +439,6 @@ const resetForm = (): void => {
   priceInput.value = ''
   quantityInput.value = ''
 }
-
-const calculateItemLength = (): void => {
-  totalLengthElem.innerText = list.getItemsLength().toString()
-}
-calculateItemLength()
 
 // clear all items
 clearItemsBtn.addEventListener('click', () => {
