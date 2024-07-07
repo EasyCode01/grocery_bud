@@ -71,6 +71,7 @@ interface UiManagerInterface {
   generateItem(items: ListItem[]): void
   updateTotalLength(length: number): void
   updateTotalPrice(price: number): void
+  sendNotificationMsg(message: string, modifier: string): void
 }
 
 // UI MANAGER CLASS
@@ -78,6 +79,7 @@ class UiManager implements UiManagerInterface {
   private isMenuOptionOpen: boolean = false
   private optionsMenu: UiElement
   userInterfaceElement: UiElementInterface
+  private timeoutId: number | null = null
 
   constructor(
     optionsMenu: UiElement,
@@ -132,6 +134,23 @@ class UiManager implements UiManagerInterface {
 
   updateTotalPrice(price: number): void {
     this.userInterfaceElement.totalPriceElem.innerText = ` $${price.toString()}`
+  }
+
+  sendNotificationMsg(message: string, modifier: string): void {
+    if (this.timeoutId !== null) {
+      clearTimeout(this.timeoutId)
+      this.timeoutId = null
+    }
+    this.userInterfaceElement.notificationMsgElem.innerText = message
+    this.userInterfaceElement.notificationMsgElem.classList.add(modifier)
+    this.userInterfaceElement.notificationMsgElem.style.opacity = '1'
+
+    this.timeoutId = setTimeout(() => {
+      this.userInterfaceElement.notificationMsgElem.innerText = ''
+      this.userInterfaceElement.notificationMsgElem.classList.remove(modifier)
+      this.userInterfaceElement.notificationMsgElem.style.opacity = '0'
+      this.timeoutId = null
+    }, 2500)
   }
 }
 
@@ -347,65 +366,25 @@ checkElement(clearItemsBtn, 'Clear items button')
 checkElement(notificationMessageElem, 'Notification message input')
 checkElement(itemContainer, 'Item container')
 
-// send notification
-let timeoutId: number | null = null
-
-const sendNotificationMsg = (
-  element: HTMLDivElement,
-  message: string,
-  modifier: string
-) => {
-  if (timeoutId !== null) {
-    clearTimeout(timeoutId)
-    timeoutId = null
-  }
-  element.innerText = message
-  element.classList.add(modifier)
-  element.style.opacity = '1'
-
-  timeoutId = setTimeout(() => {
-    element.innerText = ''
-    element.classList.remove(modifier)
-    element.style.opacity = '0'
-    timeoutId = null
-  }, 2500)
-}
-
 // Validate form input
 const validateFormInput = (): boolean => {
   if (nameInput.value === '') {
-    sendNotificationMsg(
-      notificationMessageElem,
-      'list name cannot be empty',
-      'error-msg'
-    )
+    uiManager.sendNotificationMsg('list name cannot be empty', 'error-msg')
     return false
   }
 
   if (priceInput.value === '') {
-    sendNotificationMsg(
-      notificationMessageElem,
-      'Price cannot be empty',
-      'error-msg'
-    )
+    uiManager.sendNotificationMsg('Price cannot be empty', 'error-msg')
     return false
   }
 
   if (isNaN(parseInt(priceInput.value))) {
-    sendNotificationMsg(
-      notificationMessageElem,
-      'Price must be a number',
-      'error-msg'
-    )
+    uiManager.sendNotificationMsg('Price must be a number', 'error-msg')
     return false
   }
 
   if (quantityInput.value === '') {
-    sendNotificationMsg(
-      notificationMessageElem,
-      'quantity cannot be empty',
-      'error-msg'
-    )
+    uiManager.sendNotificationMsg('quantity cannot be empty', 'error-msg')
     return false
   }
 
@@ -441,8 +420,7 @@ const acceptItem = (): void => {
   uiManager.updateTotalPrice(list.getTotalPrice())
   attachDeleteListener()
 
-  sendNotificationMsg(
-    notificationMessageElem,
+  uiManager.sendNotificationMsg(
     `${item.name} is successfully added`,
     'success-msg'
   )

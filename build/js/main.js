@@ -40,6 +40,7 @@ class ThemeManager {
 class UiManager {
     constructor(optionsMenu, userInterfaceElement) {
         this.isMenuOptionOpen = false;
+        this.timeoutId = null;
         this.optionsMenu = optionsMenu;
         this.userInterfaceElement = userInterfaceElement;
     }
@@ -84,6 +85,21 @@ class UiManager {
     }
     updateTotalPrice(price) {
         this.userInterfaceElement.totalPriceElem.innerText = ` $${price.toString()}`;
+    }
+    sendNotificationMsg(message, modifier) {
+        if (this.timeoutId !== null) {
+            clearTimeout(this.timeoutId);
+            this.timeoutId = null;
+        }
+        this.userInterfaceElement.notificationMsgElem.innerText = message;
+        this.userInterfaceElement.notificationMsgElem.classList.add(modifier);
+        this.userInterfaceElement.notificationMsgElem.style.opacity = '1';
+        this.timeoutId = setTimeout(() => {
+            this.userInterfaceElement.notificationMsgElem.innerText = '';
+            this.userInterfaceElement.notificationMsgElem.classList.remove(modifier);
+            this.userInterfaceElement.notificationMsgElem.style.opacity = '0';
+            this.timeoutId = null;
+        }, 2500);
     }
 }
 // LIST_MANAGER_CLASS
@@ -211,39 +227,22 @@ checkElement(quantityInput, 'quantity input element');
 checkElement(clearItemsBtn, 'Clear items button');
 checkElement(notificationMessageElem, 'Notification message input');
 checkElement(itemContainer, 'Item container');
-// send notification
-let timeoutId = null;
-const sendNotificationMsg = (element, message, modifier) => {
-    if (timeoutId !== null) {
-        clearTimeout(timeoutId);
-        timeoutId = null;
-    }
-    element.innerText = message;
-    element.classList.add(modifier);
-    element.style.opacity = '1';
-    timeoutId = setTimeout(() => {
-        element.innerText = '';
-        element.classList.remove(modifier);
-        element.style.opacity = '0';
-        timeoutId = null;
-    }, 2500);
-};
 // Validate form input
 const validateFormInput = () => {
     if (nameInput.value === '') {
-        sendNotificationMsg(notificationMessageElem, 'list name cannot be empty', 'error-msg');
+        uiManager.sendNotificationMsg('list name cannot be empty', 'error-msg');
         return false;
     }
     if (priceInput.value === '') {
-        sendNotificationMsg(notificationMessageElem, 'Price cannot be empty', 'error-msg');
+        uiManager.sendNotificationMsg('Price cannot be empty', 'error-msg');
         return false;
     }
     if (isNaN(parseInt(priceInput.value))) {
-        sendNotificationMsg(notificationMessageElem, 'Price must be a number', 'error-msg');
+        uiManager.sendNotificationMsg('Price must be a number', 'error-msg');
         return false;
     }
     if (quantityInput.value === '') {
-        sendNotificationMsg(notificationMessageElem, 'quantity cannot be empty', 'error-msg');
+        uiManager.sendNotificationMsg('quantity cannot be empty', 'error-msg');
         return false;
     }
     return true;
@@ -272,7 +271,7 @@ const acceptItem = () => {
     uiManager.updateTotalLength(list.getItemsLength());
     uiManager.updateTotalPrice(list.getTotalPrice());
     attachDeleteListener();
-    sendNotificationMsg(notificationMessageElem, `${item.name} is successfully added`, 'success-msg');
+    uiManager.sendNotificationMsg(`${item.name} is successfully added`, 'success-msg');
 };
 const resetForm = () => {
     nameInput.value = '';
