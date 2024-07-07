@@ -113,22 +113,22 @@ class ListManager {
         this.saveToStorage();
         return true;
     }
-    saveToStorage() {
-        localStorage.setItem(LIST_ITEMS, JSON.stringify(this._items));
+    editItem(itemId, newItem) {
+        this._items = this._items.map((item) => {
+            if (item.id === itemId) {
+                return newItem;
+            }
+            return item;
+        });
     }
-    retrieveFromStorage() {
-        const storedList = localStorage.getItem(LIST_ITEMS);
-        this._items = storedList ? JSON.parse(storedList) : [];
+    removeItem(id) {
+        const initialLength = this._items.length;
+        this._items = this._items.filter((item) => item.id !== id);
+        this.saveToStorage();
+        return this._items.length < initialLength;
     }
     getItems() {
         return this._items;
-    }
-    clearItems() {
-        this._items = [];
-        this.saveToStorage();
-    }
-    getItemsLength() {
-        return this._items.length;
     }
     getTotalPrice() {
         if (this._items.length === 0)
@@ -137,12 +137,19 @@ class ListManager {
         const sum = total.reduce((acc, cur) => acc + cur, 0);
         return sum;
     }
-    // not sorted
-    removeItem(id) {
-        const initialLength = this._items.length;
-        this._items = this._items.filter((item) => item.id !== id);
+    getItemsLength() {
+        return this._items.length;
+    }
+    saveToStorage() {
+        localStorage.setItem(LIST_ITEMS, JSON.stringify(this._items));
+    }
+    retrieveFromStorage() {
+        const storedList = localStorage.getItem(LIST_ITEMS);
+        this._items = storedList ? JSON.parse(storedList) : [];
+    }
+    clearItems() {
+        this._items = [];
         this.saveToStorage();
-        return this._items.length < initialLength;
     }
 }
 //////////// Access DOM ELEMENTS /////////////////////////

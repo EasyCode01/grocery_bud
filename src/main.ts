@@ -164,10 +164,14 @@ interface ListItem {
 
 interface ListManagerInterface {
   addItem(item: ListItem): boolean
+  editItem(itemId: string, newItem: ListItem): void
   removeItem(id: string): boolean
+  getTotalPrice(): number
   getItems(): ListItem[]
+  getItemsLength(): number
   saveToStorage(): void
   retrieveFromStorage(): void
+  clearItems(): void
 }
 
 // LIST_MANAGER_CLASS
@@ -184,26 +188,25 @@ class ListManager implements ListManagerInterface {
     return true
   }
 
-  saveToStorage(): void {
-    localStorage.setItem(LIST_ITEMS, JSON.stringify(this._items))
+  editItem(itemId: string, newItem: ListItem): void {
+    this._items = this._items.map((item) => {
+      if (item.id === itemId) {
+        return newItem
+      }
+      return item
+    })
   }
 
-  retrieveFromStorage(): void {
-    const storedList = localStorage.getItem(LIST_ITEMS)
-    this._items = storedList ? JSON.parse(storedList) : []
+  removeItem(id: string): boolean {
+    const initialLength = this._items.length
+    this._items = this._items.filter((item) => item.id !== id)
+    this.saveToStorage()
+
+    return this._items.length < initialLength
   }
 
   getItems(): ListItem[] {
     return this._items
-  }
-
-  clearItems(): void {
-    this._items = []
-    this.saveToStorage()
-  }
-
-  getItemsLength(): number {
-    return this._items.length
   }
 
   getTotalPrice(): number {
@@ -216,14 +219,22 @@ class ListManager implements ListManagerInterface {
     return sum
   }
 
-  // not sorted
+  getItemsLength(): number {
+    return this._items.length
+  }
 
-  removeItem(id: string): boolean {
-    const initialLength = this._items.length
-    this._items = this._items.filter((item) => item.id !== id)
+  saveToStorage(): void {
+    localStorage.setItem(LIST_ITEMS, JSON.stringify(this._items))
+  }
+
+  retrieveFromStorage(): void {
+    const storedList = localStorage.getItem(LIST_ITEMS)
+    this._items = storedList ? JSON.parse(storedList) : []
+  }
+
+  clearItems(): void {
+    this._items = []
     this.saveToStorage()
-
-    return this._items.length < initialLength
   }
 }
 
