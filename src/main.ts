@@ -399,6 +399,13 @@ uiManager.generateItem(list.getItems())
 uiManager.updateTotalLength(list.getItemsLength())
 uiManager.updateTotalPrice(list.getTotalPrice())
 
+const updateUI = (message: string, modifier: string): void => {
+  uiManager.generateItem(list.getItems())
+  uiManager.sendNotificationMsg(message, message)
+  uiManager.updateTotalLength(list.getItemsLength())
+  uiManager.updateTotalPrice(list.getTotalPrice())
+}
+
 const generateItemId = (): string => {
   let itemId = new Date().getTime()
   const idPattern = 'item'
@@ -414,16 +421,9 @@ const acceptItem = (): void => {
   }
 
   list.addItem(item)
-  console.log(list.getItems())
   uiManager.generateItem(list.getItems())
-  uiManager.updateTotalLength(list.getItemsLength())
-  uiManager.updateTotalPrice(list.getTotalPrice())
+  updateUI(`${item.name} is successfully added`, 'success-msg')
   attachDeleteListener()
-
-  uiManager.sendNotificationMsg(
-    `${item.name} is successfully added`,
-    'success-msg'
-  )
 }
 
 const resetForm = (): void => {
@@ -440,9 +440,7 @@ clearItemsBtn.addEventListener('click', () => {
   }
   list.clearItems()
   uiManager.generateItem(list.getItems())
-  uiManager.sendNotificationMsg('items cleared', 'success-msg')
-  uiManager.updateTotalLength(list.getItemsLength())
-  uiManager.updateTotalPrice(list.getTotalPrice())
+  updateUI('items cleared', 'success-msg')
 })
 
 formList.addEventListener('submit', (e: Event) => {
@@ -460,13 +458,10 @@ const attachDeleteListener = (): void => {
     removeBtn.addEventListener('click', () => {
       let id = removeBtn.id
       list.removeItem(id)
-      uiManager.generateItem(list.getItems())
-      uiManager.sendNotificationMsg('Item removed', 'error-msg')
+      updateUI('Item removed', 'error-msg')
       attachDeleteListener()
-      uiManager.updateTotalLength(list.getItemsLength())
-      uiManager.updateTotalPrice(list.getTotalPrice())
     })
   })
 }
-
+// initial render
 attachDeleteListener()
