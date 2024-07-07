@@ -115,6 +115,19 @@ class UiManager implements UiManagerInterface {
       `
       })
       .join('')
+
+    // add event listener to the delete icon
+    items.forEach((item) => {
+      let { id } = item
+      const removeBtn = document.querySelector(`.remove-btn-${id}`)
+      if (removeBtn) {
+        removeBtn.addEventListener('click', () => {
+          // Trigger an event or callback here to handle item removal
+          const event = new CustomEvent('itemRemoved', { detail: { id } })
+          document.dispatchEvent(event)
+        })
+      }
+    })
   }
 
   updateTotalLength(length: number): void {
@@ -180,6 +193,7 @@ class ListManager implements ListManagerInterface {
   }
 
   getTotalPrice(): number {
+    if (this._items.length === 0) return 0
     const total: number[] = this._items.map(
       (item) => item.price * item.quantity
     )
@@ -195,13 +209,7 @@ class ListManager implements ListManagerInterface {
     this._items = this._items.filter((item) => item.id !== id)
     this.saveToStorage()
 
-    const itemRemoved = this._items.length < initialLength
-
-    if (itemRemoved) {
-      return true
-    } else {
-      return false
-    }
+    return this._items.length < initialLength
   }
 }
 

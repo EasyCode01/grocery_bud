@@ -70,6 +70,18 @@ class UiManager {
       `;
         })
             .join('');
+        // add event listener to the delete icon
+        items.forEach((item) => {
+            let { id } = item;
+            const removeBtn = document.querySelector(`.remove-btn-${id}`);
+            if (removeBtn) {
+                removeBtn.addEventListener('click', () => {
+                    // Trigger an event or callback here to handle item removal
+                    const event = new CustomEvent('itemRemoved', { detail: { id } });
+                    document.dispatchEvent(event);
+                });
+            }
+        });
     }
     updateTotalLength(length) {
         this.userInterfaceElement.totalItemElem.innerText = length.toString();
@@ -107,6 +119,8 @@ class ListManager {
         return this._items.length;
     }
     getTotalPrice() {
+        if (this._items.length === 0)
+            return 0;
         const total = this._items.map((item) => item.price * item.quantity);
         const sum = total.reduce((acc, cur) => acc + cur, 0);
         return sum;
@@ -116,13 +130,7 @@ class ListManager {
         const initialLength = this._items.length;
         this._items = this._items.filter((item) => item.id !== id);
         this.saveToStorage();
-        const itemRemoved = this._items.length < initialLength;
-        if (itemRemoved) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return this._items.length < initialLength;
     }
 }
 //////////// Access DOM ELEMENTS /////////////////////////
