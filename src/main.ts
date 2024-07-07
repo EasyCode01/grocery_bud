@@ -1,7 +1,7 @@
 // APP CONSTANTS
-const THEME_LIGHT = 'light'
-const THEME_DARK = 'dark'
-const HIDE_CLASS = 'hide'
+const THEME_LIGHT: string = 'light'
+const THEME_DARK: string = 'dark'
+const HIDE_CLASS: string = 'hide'
 const LIST_ITEMS: string = 'list-items'
 
 // UI ELEMENT
@@ -434,9 +434,13 @@ const resetForm = (): void => {
 
 // clear all items
 clearItemsBtn.addEventListener('click', () => {
-  if (list.getItemsLength() === 0) return
+  if (list.getItemsLength() === 0) {
+    uiManager.sendNotificationMsg('No item in the list', 'error-msg')
+    return
+  }
   list.clearItems()
   uiManager.generateItem(list.getItems())
+  uiManager.sendNotificationMsg('items cleared', 'success-msg')
   uiManager.updateTotalLength(list.getItemsLength())
   uiManager.updateTotalPrice(list.getTotalPrice())
 })
@@ -457,6 +461,7 @@ const attachDeleteListener = (): void => {
       let id = removeBtn.id
       list.removeItem(id)
       uiManager.generateItem(list.getItems())
+      uiManager.sendNotificationMsg('Item removed', 'error-msg')
       attachDeleteListener()
       uiManager.updateTotalLength(list.getItemsLength())
       uiManager.updateTotalPrice(list.getTotalPrice())

@@ -280,10 +280,13 @@ const resetForm = () => {
 };
 // clear all items
 clearItemsBtn.addEventListener('click', () => {
-    if (list.getItemsLength() === 0)
+    if (list.getItemsLength() === 0) {
+        uiManager.sendNotificationMsg('No item in the list', 'error-msg');
         return;
+    }
     list.clearItems();
     uiManager.generateItem(list.getItems());
+    uiManager.sendNotificationMsg('items cleared', 'success-msg');
     uiManager.updateTotalLength(list.getItemsLength());
     uiManager.updateTotalPrice(list.getTotalPrice());
 });
@@ -302,6 +305,7 @@ const attachDeleteListener = () => {
             let id = removeBtn.id;
             list.removeItem(id);
             uiManager.generateItem(list.getItems());
+            uiManager.sendNotificationMsg('Item removed', 'error-msg');
             attachDeleteListener();
             uiManager.updateTotalLength(list.getItemsLength());
             uiManager.updateTotalPrice(list.getTotalPrice());
