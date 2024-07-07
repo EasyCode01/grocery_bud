@@ -87,14 +87,13 @@ class UiManager {
         this.userInterfaceElement.totalItemElem.innerText = length.toString();
     }
     updateTotalPrice(price) {
-        this.userInterfaceElement.totalPriceElem.innerText = price.toString();
+        this.userInterfaceElement.totalPriceElem.innerText = ` $${price.toString()}`;
     }
 }
 // LIST_MANAGER_CLASS
 class ListManager {
-    constructor(listWrapper) {
+    constructor() {
         this._items = [];
-        this.listWrapper = listWrapper;
         this.retrieveFromStorage();
     }
     addItem(item) {
@@ -114,6 +113,7 @@ class ListManager {
     }
     clearItems() {
         this._items = [];
+        this.saveToStorage();
     }
     getItemsLength() {
         return this._items.length;
@@ -170,6 +170,7 @@ const initializeUiManager = (optionsMenu, optionsMenuIcon) => {
     checkElement(userInterfaeElement.notificationMsgElem, 'notification message element');
     const uiManager = new UiManager(optionsMenu, userInterfaeElement);
     optionsMenuIcon.addEventListener('click', () => uiManager.toggleOptionMenu());
+    return uiManager;
 };
 const initializeLightAndDarkModeButtons = (themeManager, lightModeButton, darkModeButton) => {
     lightModeButton.addEventListener('click', () => {
@@ -200,7 +201,7 @@ const initializeThemeManager = (uiAppElement, lightModeButton, darkModeButton) =
     initializeLightAndDarkModeButtons(themeManager, lightModeButton, darkModeButton);
 };
 initializeThemeManager(uiAppElement, lightModeButton, darkModeButton);
-initializeUiManager(optionsMenu, optionsMenuIcon);
+const uiManager = initializeUiManager(optionsMenu, optionsMenuIcon);
 // Accessing form Elements
 const formList = document.querySelector('.grocery__form');
 const nameInput = document.querySelector('#item__input');
@@ -251,6 +252,12 @@ const validateFormInput = () => {
     }
     return true;
 };
+// instantiate List
+const list = new ListManager();
+// initial render
+uiManager.generateItem(list.getItems());
+uiManager.updateTotalLength(list.getItemsLength());
+uiManager.updateTotalPrice(list.getTotalPrice());
 // generate id
 let itemId = 0;
 const generateItemId = () => {
@@ -258,8 +265,6 @@ const generateItemId = () => {
     const idPattern = 'item';
     return `${idPattern}-${itemId}`;
 };
-// intantiate List
-const list = new ListManager(itemContainer);
 const acceptItem = () => {
     let item = {
         id: generateItemId(),
@@ -269,6 +274,9 @@ const acceptItem = () => {
     };
     list.addItem(item);
     console.log(list.getItems());
+    uiManager.generateItem(list.getItems());
+    uiManager.updateTotalLength(list.getItemsLength());
+    uiManager.updateTotalPrice(list.getTotalPrice());
     sendNotificationMsg(notificationMessageElem, `${item.name} is successfully added`, 'success-msg');
 };
 const resetForm = () => {
@@ -278,7 +286,12 @@ const resetForm = () => {
 };
 // clear all items
 clearItemsBtn.addEventListener('click', () => {
+    if (list.getItemsLength() === 0)
+        return;
     list.clearItems();
+    uiManager.generateItem(list.getItems());
+    uiManager.updateTotalLength(list.getItemsLength());
+    uiManager.updateTotalPrice(list.getTotalPrice());
 });
 formList.addEventListener('submit', (e) => {
     e.preventDefault();

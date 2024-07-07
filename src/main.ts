@@ -135,7 +135,7 @@ class UiManager implements UiManagerInterface {
   }
 
   updateTotalPrice(price: number): void {
-    this.userInterfaceElement.totalPriceElem.innerText = price.toString()
+    this.userInterfaceElement.totalPriceElem.innerText = ` $${price.toString()}`
   }
 }
 
@@ -158,10 +158,8 @@ interface ListManagerInterface {
 // LIST_MANAGER_CLASS
 class ListManager implements ListManagerInterface {
   private _items: ListItem[] = []
-  private listWrapper: UiElement
 
-  constructor(listWrapper: UiElement) {
-    this.listWrapper = listWrapper
+  constructor() {
     this.retrieveFromStorage()
   }
 
@@ -186,6 +184,7 @@ class ListManager implements ListManagerInterface {
 
   clearItems(): void {
     this._items = []
+    this.saveToStorage()
   }
 
   getItemsLength(): number {
@@ -278,6 +277,7 @@ const initializeUiManager = (
 
   const uiManager = new UiManager(optionsMenu, userInterfaeElement)
   optionsMenuIcon.addEventListener('click', () => uiManager.toggleOptionMenu())
+  return uiManager
 }
 
 const initializeLightAndDarkModeButtons = (
@@ -331,7 +331,7 @@ const initializeThemeManager = (
 }
 
 initializeThemeManager(uiAppElement, lightModeButton, darkModeButton)
-initializeUiManager(optionsMenu, optionsMenuIcon)
+const uiManager = initializeUiManager(optionsMenu, optionsMenuIcon)
 
 // Accessing form Elements
 
@@ -416,6 +416,14 @@ const validateFormInput = (): boolean => {
   return true
 }
 
+// instantiate List
+const list = new ListManager()
+
+// initial render
+uiManager.generateItem(list.getItems())
+uiManager.updateTotalLength(list.getItemsLength())
+uiManager.updateTotalPrice(list.getTotalPrice())
+
 // generate id
 let itemId: number = 0
 const generateItemId = (): string => {
@@ -423,9 +431,6 @@ const generateItemId = (): string => {
   const idPattern = 'item'
   return `${idPattern}-${itemId}`
 }
-
-// intantiate List
-const list = new ListManager(itemContainer)
 
 const acceptItem = (): void => {
   let item: ListItem = {
@@ -437,6 +442,9 @@ const acceptItem = (): void => {
 
   list.addItem(item)
   console.log(list.getItems())
+  uiManager.generateItem(list.getItems())
+  uiManager.updateTotalLength(list.getItemsLength())
+  uiManager.updateTotalPrice(list.getTotalPrice())
 
   sendNotificationMsg(
     notificationMessageElem,
@@ -453,7 +461,11 @@ const resetForm = (): void => {
 
 // clear all items
 clearItemsBtn.addEventListener('click', () => {
+  if (list.getItemsLength() === 0) return
   list.clearItems()
+  uiManager.generateItem(list.getItems())
+  uiManager.updateTotalLength(list.getItemsLength())
+  uiManager.updateTotalPrice(list.getTotalPrice())
 })
 
 formList.addEventListener('submit', (e: Event) => {
