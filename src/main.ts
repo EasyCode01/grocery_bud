@@ -109,7 +109,7 @@ class UiManager implements UiManagerInterface {
                 <span class="quantity__price">${quantity} x ${price}</span>
                 <div class="actions">
                   <span><i class="bi bi-pencil-square"></i></span>
-                  <span class="remove-btn-${id} press"><i class="bi bi-trash"></i></span>
+                  <span id="${id}" class="remove-btn remove-btn-${id} press"><i class="bi bi-trash"></i></span>
                 </div>
               </li>
       `
@@ -121,11 +121,7 @@ class UiManager implements UiManagerInterface {
       let { id } = item
       const removeBtn = document.querySelector(`.remove-btn-${id}`)
       if (removeBtn) {
-        removeBtn.addEventListener('click', () => {
-          // Trigger an event or callback here to handle item removal
-          const event = new CustomEvent('itemRemoved', { detail: { id } })
-          document.dispatchEvent(event)
-        })
+        removeBtn.addEventListener('click', () => {})
       }
     })
   }
@@ -380,7 +376,7 @@ const validateFormInput = (): boolean => {
   if (nameInput.value === '') {
     sendNotificationMsg(
       notificationMessageElem,
-      'Name list cannot be empty',
+      'list name cannot be empty',
       'error-msg'
     )
     return false
@@ -424,10 +420,8 @@ uiManager.generateItem(list.getItems())
 uiManager.updateTotalLength(list.getItemsLength())
 uiManager.updateTotalPrice(list.getTotalPrice())
 
-// generate id
-let itemId: number = 0
 const generateItemId = (): string => {
-  itemId++
+  let itemId = new Date().getTime()
   const idPattern = 'item'
   return `${idPattern}-${itemId}`
 }
@@ -445,6 +439,7 @@ const acceptItem = (): void => {
   uiManager.generateItem(list.getItems())
   uiManager.updateTotalLength(list.getItemsLength())
   uiManager.updateTotalPrice(list.getTotalPrice())
+  attachDeleteListener()
 
   sendNotificationMsg(
     notificationMessageElem,
@@ -475,3 +470,20 @@ formList.addEventListener('submit', (e: Event) => {
     resetForm()
   }
 })
+
+const attachDeleteListener = (): void => {
+  let deleteItemBtns = document.querySelectorAll('.remove-btn')
+  deleteItemBtns.forEach((deleteBtn) => {
+    let removeBtn = deleteBtn as HTMLSpanElement
+    removeBtn.addEventListener('click', () => {
+      let id = removeBtn.id
+      list.removeItem(id)
+      uiManager.generateItem(list.getItems())
+      attachDeleteListener()
+      uiManager.updateTotalLength(list.getItemsLength())
+      uiManager.updateTotalPrice(list.getTotalPrice())
+    })
+  })
+}
+
+attachDeleteListener()
