@@ -88,11 +88,45 @@ The purpose of the Grocery Bud app is to help users take down a list of items th
 
 ## Code Examples
 
-To be provided.
+![code structure image](../grocery_app/build/images/code-structure.png)
 
 ## Contributing
 
-To be provided.
+Contributions are welcome! If you have suggestions for improvements or find any issues, please feel free to submit a pull request or open an issue.
+
+## Steps to Contribute:
+
+1. **Fork the Repository**: Click the "Fork" button at the top right of this repository page and follow the instructions to create a copy of this repository in your GitHub account.
+
+2. **Clone Your Fork**:
+
+   ```bash
+   git clone https://github.com/yourusername/grocery-bud.git
+   ```
+
+3. **Create a New Branch**:
+
+   ```bash
+   cd grocery-bud
+   git checkout -b feature/your-feature-name
+   ```
+
+4. **Make Your Changes**: Implement your changes or additions.
+
+5. **Commit Your Changes**:
+
+   ```bash
+   git add .
+   git commit -m "Add feature/your-feature-name"
+   ```
+
+6. **Push to Your Fork**:
+
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+7. **Create a Pull Request**: Go to the original repository and click on "Pull Requests", then "New Pull Request", and follow the instructions to submit your pull request.
 
 ## Contact Information
 
