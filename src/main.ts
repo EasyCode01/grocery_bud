@@ -79,6 +79,7 @@ class UiManager implements UiManagerInterface {
   private isMenuOptionOpen: boolean = false
   private optionsMenu: UiElement
   userInterfaceElement: UiElementInterface
+  isEditableForm: boolean = false
   private timeoutId: number | null = null
 
   constructor(
@@ -110,7 +111,7 @@ class UiManager implements UiManagerInterface {
                 <span class="item__name">${name}</span>
                 <span class="quantity__price">${quantity} x ${price}</span>
                 <div class="actions">
-                  <span><i class="bi bi-pencil-square"></i></span>
+                  <span id="${id}" class="edit-btn"><i class="bi bi-pencil-square"></i></span>
                   <span id="${id}" class="remove-btn remove-btn-${id} press"><i class="bi bi-trash"></i></span>
                 </div>
               </li>
@@ -152,6 +153,14 @@ class UiManager implements UiManagerInterface {
       this.timeoutId = null
     }, 2500)
   }
+
+  activateEditableForm(): void {
+    this.isEditableForm = true
+  }
+
+  deactivateEditableForm(): void {
+    this.isEditableForm = false
+  }
 }
 
 // LISITEM INTERFACE
@@ -165,9 +174,12 @@ interface ListItem {
 interface ListManagerInterface {
   addItem(item: ListItem): boolean
   editItem(itemId: string, newItem: ListItem): void
+  setItemToEditId(id: string): void
+  clearItemToEditId(id: string): void
   removeItem(id: string): boolean
   getTotalPrice(): number
   getItems(): ListItem[]
+  findItem(id: string): ListItem | undefined
   getItemsLength(): number
   saveToStorage(): void
   retrieveFromStorage(): void
@@ -177,6 +189,7 @@ interface ListManagerInterface {
 // LIST_MANAGER_CLASS
 class ListManager implements ListManagerInterface {
   private _items: ListItem[] = []
+  itemToEditId: string = ''
 
   constructor() {
     this.retrieveFromStorage()
@@ -195,6 +208,16 @@ class ListManager implements ListManagerInterface {
       }
       return item
     })
+
+    this.saveToStorage()
+  }
+
+  setItemToEditId(id: string): void {
+    this.itemToEditId = id
+  }
+
+  clearItemToEditId(id: string): void {
+    this.itemToEditId = ''
   }
 
   removeItem(id: string): boolean {
@@ -207,6 +230,14 @@ class ListManager implements ListManagerInterface {
 
   getItems(): ListItem[] {
     return this._items
+  }
+
+  findItem(id: string): ListItem | undefined {
+    let itemFound = this._items.find((item) => item.id === id)
+    if (itemFound !== undefined) {
+      return itemFound
+    }
+    return undefined
   }
 
   getTotalPrice(): number {
@@ -378,7 +409,7 @@ checkElement(notificationMessageElem, 'Notification message input')
 checkElement(itemContainer, 'Item container')
 
 // Validate form input
-const validateFormInput = (): boolean => {
+const isFormInputValid = (): boolean => {
   if (nameInput.value === '') {
     uiManager.sendNotificationMsg('list name cannot be empty', 'error-msg')
     return false
@@ -412,7 +443,7 @@ uiManager.updateTotalPrice(list.getTotalPrice())
 
 const updateUI = (message: string, modifier: string): void => {
   uiManager.generateItem(list.getItems())
-  uiManager.sendNotificationMsg(message, message)
+  uiManager.sendNotificationMsg(message, modifier)
   uiManager.updateTotalLength(list.getItemsLength())
   uiManager.updateTotalPrice(list.getTotalPrice())
 }
@@ -435,6 +466,18 @@ const acceptItem = (): void => {
   uiManager.generateItem(list.getItems())
   updateUI(`${item.name} is successfully added`, 'success-msg')
   attachDeleteListener()
+  attachEditListener()
+}
+
+const updateItem = (): ListItem => {
+  let item: ListItem = {
+    id: generateItemId(),
+    name: nameInput.value,
+    price: parseInt(priceInput.value),
+    quantity: parseInt(quantityInput.value),
+  }
+
+  return item
 }
 
 const resetForm = (): void => {
@@ -456,10 +499,23 @@ clearItemsBtn.addEventListener('click', () => {
 
 formList.addEventListener('submit', (e: Event) => {
   e.preventDefault()
-  if (validateFormInput()) {
+  if (isFormInputValid() && !uiManager.isEditableForm) {
     acceptItem()
     resetForm()
+    return
   }
+
+  if (isFormInputValid() && uiManager.isEditableForm) {
+    list.editItem(list.itemToEditId, updateItem())
+    updateUI('Item updated', 'success-msg')
+    uiManager.deactivateEditableForm()
+    exitUpdateMode()
+    attachDeleteListener()
+    attachEditListener()
+    return
+  }
+
+  return
 })
 
 const attachDeleteListener = (): void => {
@@ -471,8 +527,57 @@ const attachDeleteListener = (): void => {
       list.removeItem(id)
       updateUI('Item removed', 'error-msg')
       attachDeleteListener()
+      attachEditListener()
     })
   })
 }
 // initial render
 attachDeleteListener()
+
+const attachEditListener = (): void => {
+  const editItemBtns = document.querySelectorAll('.edit-btn')
+  editItemBtns.forEach((btn) => {
+    let editBtn = btn as HTMLSpanElement
+    editBtn.addEventListener('click', () => {
+      let id = editBtn.id
+      populateEditForm(id)
+    })
+  })
+}
+
+attachEditListener()
+
+const populateEditForm = (id: string): void => {
+  let itemToEdit = list.findItem(id)
+  if (itemToEdit !== undefined) {
+    nameInput.value = itemToEdit.name
+    priceInput.value = itemToEdit.price.toString()
+    quantityInput.value = itemToEdit.quantity.toString()
+
+    switchToUpdateMode()
+    list.setItemToEditId(itemToEdit.id)
+    uiManager.activateEditableForm()
+  } else {
+    uiManager.sendNotificationMsg('item not found', 'error-msg')
+    return
+  }
+}
+
+const switchToUpdateMode = (): void => {
+  let addOrUpdateBtn = document.querySelector(
+    '.add-or-update-btn'
+  ) as HTMLButtonElement
+  checkElement(addOrUpdateBtn, 'add or update button')
+  addOrUpdateBtn.innerText = 'Update item'
+  addOrUpdateBtn.classList.add('modify--btn')
+}
+
+const exitUpdateMode = (): void => {
+  let addOrUpdateBtn = document.querySelector(
+    '.add-or-update-btn'
+  ) as HTMLButtonElement
+  checkElement(addOrUpdateBtn, 'add or update button')
+  addOrUpdateBtn.innerText = 'Submit'
+  addOrUpdateBtn.classList.remove('modify--btn')
+  resetForm()
+}

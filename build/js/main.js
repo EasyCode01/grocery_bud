@@ -40,6 +40,7 @@ class ThemeManager {
 class UiManager {
     constructor(optionsMenu, userInterfaceElement) {
         this.isMenuOptionOpen = false;
+        this.isEditableForm = false;
         this.timeoutId = null;
         this.optionsMenu = optionsMenu;
         this.userInterfaceElement = userInterfaceElement;
@@ -64,7 +65,7 @@ class UiManager {
                 <span class="item__name">${name}</span>
                 <span class="quantity__price">${quantity} x ${price}</span>
                 <div class="actions">
-                  <span><i class="bi bi-pencil-square"></i></span>
+                  <span id="${id}" class="edit-btn"><i class="bi bi-pencil-square"></i></span>
                   <span id="${id}" class="remove-btn remove-btn-${id} press"><i class="bi bi-trash"></i></span>
                 </div>
               </li>
@@ -101,11 +102,18 @@ class UiManager {
             this.timeoutId = null;
         }, 2500);
     }
+    activateEditableForm() {
+        this.isEditableForm = true;
+    }
+    deactivateEditableForm() {
+        this.isEditableForm = false;
+    }
 }
 // LIST_MANAGER_CLASS
 class ListManager {
     constructor() {
         this._items = [];
+        this.itemToEditId = '';
         this.retrieveFromStorage();
     }
     addItem(item) {
@@ -120,6 +128,13 @@ class ListManager {
             }
             return item;
         });
+        this.saveToStorage();
+    }
+    setItemToEditId(id) {
+        this.itemToEditId = id;
+    }
+    clearItemToEditId(id) {
+        this.itemToEditId = '';
     }
     removeItem(id) {
         const initialLength = this._items.length;
@@ -129,6 +144,13 @@ class ListManager {
     }
     getItems() {
         return this._items;
+    }
+    findItem(id) {
+        let itemFound = this._items.find((item) => item.id === id);
+        if (itemFound !== undefined) {
+            return itemFound;
+        }
+        return undefined;
     }
     getTotalPrice() {
         if (this._items.length === 0)
@@ -235,7 +257,7 @@ checkElement(clearItemsBtn, 'Clear items button');
 checkElement(notificationMessageElem, 'Notification message input');
 checkElement(itemContainer, 'Item container');
 // Validate form input
-const validateFormInput = () => {
+const isFormInputValid = () => {
     if (nameInput.value === '') {
         uiManager.sendNotificationMsg('list name cannot be empty', 'error-msg');
         return false;
@@ -262,7 +284,7 @@ uiManager.updateTotalLength(list.getItemsLength());
 uiManager.updateTotalPrice(list.getTotalPrice());
 const updateUI = (message, modifier) => {
     uiManager.generateItem(list.getItems());
-    uiManager.sendNotificationMsg(message, message);
+    uiManager.sendNotificationMsg(message, modifier);
     uiManager.updateTotalLength(list.getItemsLength());
     uiManager.updateTotalPrice(list.getTotalPrice());
 };
@@ -282,6 +304,16 @@ const acceptItem = () => {
     uiManager.generateItem(list.getItems());
     updateUI(`${item.name} is successfully added`, 'success-msg');
     attachDeleteListener();
+    attachEditListener();
+};
+const updateItem = () => {
+    let item = {
+        id: generateItemId(),
+        name: nameInput.value,
+        price: parseInt(priceInput.value),
+        quantity: parseInt(quantityInput.value),
+    };
+    return item;
 };
 const resetForm = () => {
     nameInput.value = '';
@@ -300,10 +332,21 @@ clearItemsBtn.addEventListener('click', () => {
 });
 formList.addEventListener('submit', (e) => {
     e.preventDefault();
-    if (validateFormInput()) {
+    if (isFormInputValid() && !uiManager.isEditableForm) {
         acceptItem();
         resetForm();
+        return;
     }
+    if (isFormInputValid() && uiManager.isEditableForm) {
+        list.editItem(list.itemToEditId, updateItem());
+        updateUI('Item updated', 'success-msg');
+        uiManager.deactivateEditableForm();
+        exitUpdateMode();
+        attachDeleteListener();
+        attachEditListener();
+        return;
+    }
+    return;
 });
 const attachDeleteListener = () => {
     let deleteItemBtns = document.querySelectorAll('.remove-btn');
@@ -314,8 +357,48 @@ const attachDeleteListener = () => {
             list.removeItem(id);
             updateUI('Item removed', 'error-msg');
             attachDeleteListener();
+            attachEditListener();
         });
     });
 };
 // initial render
 attachDeleteListener();
+const attachEditListener = () => {
+    const editItemBtns = document.querySelectorAll('.edit-btn');
+    editItemBtns.forEach((btn) => {
+        let editBtn = btn;
+        editBtn.addEventListener('click', () => {
+            let id = editBtn.id;
+            populateEditForm(id);
+        });
+    });
+};
+attachEditListener();
+const populateEditForm = (id) => {
+    let itemToEdit = list.findItem(id);
+    if (itemToEdit !== undefined) {
+        nameInput.value = itemToEdit.name;
+        priceInput.value = itemToEdit.price.toString();
+        quantityInput.value = itemToEdit.quantity.toString();
+        switchToUpdateMode();
+        list.setItemToEditId(itemToEdit.id);
+        uiManager.activateEditableForm();
+    }
+    else {
+        uiManager.sendNotificationMsg('item not found', 'error-msg');
+        return;
+    }
+};
+const switchToUpdateMode = () => {
+    let addOrUpdateBtn = document.querySelector('.add-or-update-btn');
+    checkElement(addOrUpdateBtn, 'add or update button');
+    addOrUpdateBtn.innerText = 'Update item';
+    addOrUpdateBtn.classList.add('modify--btn');
+};
+const exitUpdateMode = () => {
+    let addOrUpdateBtn = document.querySelector('.add-or-update-btn');
+    checkElement(addOrUpdateBtn, 'add or update button');
+    addOrUpdateBtn.innerText = 'Submit';
+    addOrUpdateBtn.classList.remove('modify--btn');
+    resetForm();
+};
