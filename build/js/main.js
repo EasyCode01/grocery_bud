@@ -311,6 +311,8 @@ const isFormInputValid = () => {
 };
 // instantiate List
 const list = new ListManager();
+const undoStack = new Stack();
+const redoStack = new Stack();
 // initial render
 uiManager.generateItem(list.getItems());
 uiManager.updateTotalLength(list.getItemsLength());

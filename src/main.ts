@@ -488,6 +488,8 @@ const isFormInputValid = (): boolean => {
 
 // instantiate List
 const list = new ListManager()
+const undoStack = new Stack()
+const redoStack = new Stack()
 
 // initial render
 uiManager.generateItem(list.getItems())
