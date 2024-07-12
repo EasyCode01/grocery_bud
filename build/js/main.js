@@ -174,6 +174,39 @@ class ListManager {
         this.saveToStorage();
     }
 }
+// STACK_CLASS
+class Stack {
+    constructor() {
+        this._items = [];
+    }
+    push(state) {
+        this._items.push(state);
+    }
+    isEmpty() {
+        return this._items.length === 0;
+    }
+    pop() {
+        if (!this.isEmpty()) {
+            return this._items.pop();
+        }
+        return [];
+    }
+    peek() {
+        if (!this.isEmpty()) {
+            return this._items[this.getLength() - 1];
+        }
+        return null;
+    }
+    getLength() {
+        return this._items.length;
+    }
+    clear() {
+        this._items = [];
+    }
+    print() {
+        return this._items;
+    }
+}
 //////////// Access DOM ELEMENTS /////////////////////////
 const uiListElement = document.querySelector('.item__container');
 const uiAppElement = document.querySelector('.app');

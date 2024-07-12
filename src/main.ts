@@ -269,6 +269,59 @@ class ListManager implements ListManagerInterface {
   }
 }
 
+// STACK INTERFACE
+interface StackInterface {
+  push(state: ListItem[]): void
+  pop(): ListItem[]
+  isEmpty(): boolean
+  peek(): ListItem[] | null
+  getLength(): number
+  clear(): void
+  print(): ListItem[][]
+}
+
+// STACK_CLASS
+class Stack implements StackInterface {
+  private _items: ListItem[][]
+  constructor() {
+    this._items = []
+  }
+
+  push(state: ListItem[]) {
+    this._items.push(state)
+  }
+
+  isEmpty(): boolean {
+    return this._items.length === 0
+  }
+
+  pop(): ListItem[] {
+    if (!this.isEmpty()) {
+      return this._items.pop()!
+    }
+    return []
+  }
+
+  peek(): ListItem[] | null {
+    if (!this.isEmpty()) {
+      return this._items[this.getLength() - 1]
+    }
+    return null
+  }
+
+  getLength(): number {
+    return this._items.length
+  }
+
+  clear(): void {
+    this._items = []
+  }
+
+  print(): ListItem[][] {
+    return this._items
+  }
+}
+
 //////////// Access DOM ELEMENTS /////////////////////////
 
 const uiListElement = document.querySelector(
