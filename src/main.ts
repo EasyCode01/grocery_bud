@@ -176,6 +176,7 @@ interface ListItem {
 interface ListManagerInterface {
   addItem(item: ListItem): boolean
   editItem(itemId: string, newItem: ListItem): void
+  setItem(list: ListItem[]): void
   setItemToEditId(id: string): void
   clearItemToEditId(id: string): void
   removeItem(id: string): boolean
@@ -211,6 +212,11 @@ class ListManager implements ListManagerInterface {
       return item
     })
 
+    this.saveToStorage()
+  }
+
+  setItem(list: ListItem[]): void {
+    this._items = list
     this.saveToStorage()
   }
 
@@ -471,6 +477,8 @@ const quantityInput = document.querySelector('#item__qty') as HTMLInputElement
 const clearItemsBtn = document.querySelector(
   '.clear-items'
 ) as HTMLButtonElement
+const undoButton = document.querySelector('.undo') as HTMLDivElement
+const redoButton = document.querySelector('.redo') as HTMLDivElement
 
 checkElement(formList, 'Form Element List')
 checkElement(nameInput, 'name input element')
@@ -479,7 +487,8 @@ checkElement(quantityInput, 'quantity input element')
 checkElement(clearItemsBtn, 'Clear items button')
 checkElement(notificationMessageElem, 'Notification message input')
 checkElement(itemContainer, 'Item container')
-
+checkElement(undoButton, 'undo button element')
+checkElement(redoButton, 'redo button element')
 // Validate form input
 const isFormInputValid = (): boolean => {
   if (nameInput.value === '') {
@@ -664,3 +673,29 @@ const exitUpdateMode = (): void => {
   addOrUpdateBtn.classList.remove('modify--btn')
   resetForm()
 }
+
+undoButton.addEventListener('click', () => {
+  if (undoStack.isEmpty()) {
+    uiManager.sendNotificationMsg('Nothing to undo', 'error-msg')
+  } else {
+    redoStack.push([...list.getItems()])
+    list.clearItems()
+    list.setItem(undoStack.pop())
+    updateUI('undo action successful', 'success-msg')
+    attachDeleteListener()
+    attachEditListener()
+  }
+})
+
+redoButton.addEventListener('click', () => {
+  if (redoStack.isEmpty()) {
+    uiManager.sendNotificationMsg('Nothing to redo', 'error-msg')
+  } else {
+    undoStack.push([...list.getItems()])
+    list.clearItems()
+    list.setItem(redoStack.pop())
+    updateUI('redo action successful', 'success-msg')
+    attachDeleteListener()
+    attachEditListener()
+  }
+})

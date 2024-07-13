@@ -132,6 +132,10 @@ class ListManager {
         });
         this.saveToStorage();
     }
+    setItem(list) {
+        this._items = list;
+        this.saveToStorage();
+    }
     setItemToEditId(id) {
         this.itemToEditId = id;
     }
@@ -296,6 +300,8 @@ const nameInput = document.querySelector('#item__input');
 const priceInput = document.querySelector('#item__price');
 const quantityInput = document.querySelector('#item__qty');
 const clearItemsBtn = document.querySelector('.clear-items');
+const undoButton = document.querySelector('.undo');
+const redoButton = document.querySelector('.redo');
 checkElement(formList, 'Form Element List');
 checkElement(nameInput, 'name input element');
 checkElement(priceInput, 'price input element');
@@ -303,6 +309,8 @@ checkElement(quantityInput, 'quantity input element');
 checkElement(clearItemsBtn, 'Clear items button');
 checkElement(notificationMessageElem, 'Notification message input');
 checkElement(itemContainer, 'Item container');
+checkElement(undoButton, 'undo button element');
+checkElement(redoButton, 'redo button element');
 // Validate form input
 const isFormInputValid = () => {
     if (nameInput.value === '') {
@@ -460,3 +468,29 @@ const exitUpdateMode = () => {
     addOrUpdateBtn.classList.remove('modify--btn');
     resetForm();
 };
+undoButton.addEventListener('click', () => {
+    if (undoStack.isEmpty()) {
+        uiManager.sendNotificationMsg('Nothing to undo', 'error-msg');
+    }
+    else {
+        redoStack.push([...list.getItems()]);
+        list.clearItems();
+        list.setItem(undoStack.pop());
+        updateUI('undo action successful', 'success-msg');
+        attachDeleteListener();
+        attachEditListener();
+    }
+});
+redoButton.addEventListener('click', () => {
+    if (redoStack.isEmpty()) {
+        uiManager.sendNotificationMsg('Nothing to redo', 'error-msg');
+    }
+    else {
+        undoStack.push([...list.getItems()]);
+        list.clearItems();
+        list.setItem(redoStack.pop());
+        updateUI('redo action successful', 'success-msg');
+        attachDeleteListener();
+        attachEditListener();
+    }
+});
