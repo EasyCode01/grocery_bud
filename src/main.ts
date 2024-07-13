@@ -536,6 +536,8 @@ const acceptItem = (): void => {
     quantity: parseInt(quantityInput.value),
   }
 
+  undoStack.push([...list.getItems()]) // copy listItem current state to undo stack
+  redoStack.clear() // clear redo stack
   list.addItem(item)
   uiManager.generateItem(list.getItems())
   updateUI(`${item.name} is successfully added`, 'success-msg')
@@ -566,11 +568,14 @@ clearItemsBtn.addEventListener('click', () => {
     uiManager.sendNotificationMsg('No item in the list', 'error-msg')
     return
   }
+  undoStack.push([...list.getItems()]) // push current  state to undoStack
+  redoStack.clear() // clear redoStack
   list.clearItems()
   uiManager.generateItem(list.getItems())
   updateUI('items cleared', 'success-msg')
 })
 
+// add and edit form
 formList.addEventListener('submit', (e: Event) => {
   e.preventDefault()
   if (isFormInputValid() && !uiManager.isEditableForm) {
@@ -580,6 +585,8 @@ formList.addEventListener('submit', (e: Event) => {
   }
 
   if (isFormInputValid() && uiManager.isEditableForm) {
+    undoStack.push([...list.getItems()]) // push current state to undoStack
+    redoStack.clear() // clear redoStack
     list.editItem(list.itemToEditId, updateItem())
     updateUI('Item updated', 'success-msg')
     uiManager.deactivateEditableForm()
@@ -598,6 +605,8 @@ const attachDeleteListener = (): void => {
     let removeBtn = deleteBtn as HTMLSpanElement
     removeBtn.addEventListener('click', () => {
       let id = removeBtn.id
+      undoStack.push([...list.getItems()]) // push curent state to undostack
+      redoStack.clear() // clear redoStack
       list.removeItem(id)
       updateUI('Item removed', 'error-msg')
       attachDeleteListener()
