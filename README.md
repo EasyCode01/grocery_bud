@@ -19,7 +19,7 @@ The purpose of the Grocery Bud app is to help users take down a list of items th
 2. **Clone the Repository:** Open your terminal and run the following command to clone the repository:
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/EasyCode01/grocery_bud.git
    ```
 
 3. **Install Dependencies:** Navigate to the project directory and install the project dependencies specified in the `package.json` file by running:
@@ -101,7 +101,7 @@ Contributions are welcome! If you have suggestions for improvements or find any 
 2. **Clone Your Fork**:
 
    ```bash
-   git clone https://github.com/yourusername/grocery-bud.git
+   git clone https://github.com/yourusername/grocery_bud.git
    ```
 
 3. **Create a New Branch**:
