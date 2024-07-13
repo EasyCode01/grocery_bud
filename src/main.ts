@@ -3,6 +3,8 @@ const THEME_LIGHT: string = 'light'
 const THEME_DARK: string = 'dark'
 const HIDE_CLASS: string = 'hide'
 const LIST_ITEMS: string = 'list-items'
+const UNDOSTACK_LIST: string = 'undoStack-list'
+const REDO_STACK_LIST: string = 'redoStack-list'
 
 // UI ELEMENT
 type UiElement = HTMLUListElement | HTMLDivElement
@@ -278,17 +280,23 @@ interface StackInterface {
   getLength(): number
   clear(): void
   print(): ListItem[][]
+  saveToStorage(key: string): void
+  retrieveFromStorage(key: string): void
 }
 
 // STACK_CLASS
 class Stack implements StackInterface {
   private _items: ListItem[][]
-  constructor() {
+  private storageKey: string
+  constructor(storageKey: string) {
     this._items = []
+    this.storageKey = storageKey
+    this.retrieveFromStorage(this.storageKey)
   }
 
   push(state: ListItem[]) {
     this._items.push(state)
+    this.saveToStorage(this.storageKey)
   }
 
   isEmpty(): boolean {
@@ -297,6 +305,7 @@ class Stack implements StackInterface {
 
   pop(): ListItem[] {
     if (!this.isEmpty()) {
+      this.saveToStorage(this.storageKey)
       return this._items.pop()!
     }
     return []
@@ -315,10 +324,20 @@ class Stack implements StackInterface {
 
   clear(): void {
     this._items = []
+    this.saveToStorage(this.storageKey)
   }
 
   print(): ListItem[][] {
     return this._items
+  }
+
+  saveToStorage(key: string): void {
+    localStorage.setItem(key, JSON.stringify(this._items))
+  }
+
+  retrieveFromStorage(key: string): void {
+    const storedStates = localStorage.getItem(key)
+    this._items = storedStates ? JSON.parse(storedStates) : []
   }
 }
 
@@ -488,8 +507,8 @@ const isFormInputValid = (): boolean => {
 
 // instantiate List
 const list = new ListManager()
-const undoStack = new Stack()
-const redoStack = new Stack()
+const undoStack = new Stack(UNDOSTACK_LIST)
+const redoStack = new Stack(REDO_STACK_LIST)
 
 // initial render
 uiManager.generateItem(list.getItems())

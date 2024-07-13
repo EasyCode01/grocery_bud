@@ -4,6 +4,8 @@ const THEME_LIGHT = 'light';
 const THEME_DARK = 'dark';
 const HIDE_CLASS = 'hide';
 const LIST_ITEMS = 'list-items';
+const UNDOSTACK_LIST = 'undoStack-list';
+const REDO_STACK_LIST = 'redoStack-list';
 // THEME_MANAGER_CLASS
 class ThemeManager {
     constructor(appWrapperElem) {
@@ -176,17 +178,21 @@ class ListManager {
 }
 // STACK_CLASS
 class Stack {
-    constructor() {
+    constructor(storageKey) {
         this._items = [];
+        this.storageKey = storageKey;
+        this.retrieveFromStorage(this.storageKey);
     }
     push(state) {
         this._items.push(state);
+        this.saveToStorage(this.storageKey);
     }
     isEmpty() {
         return this._items.length === 0;
     }
     pop() {
         if (!this.isEmpty()) {
+            this.saveToStorage(this.storageKey);
             return this._items.pop();
         }
         return [];
@@ -202,9 +208,17 @@ class Stack {
     }
     clear() {
         this._items = [];
+        this.saveToStorage(this.storageKey);
     }
     print() {
         return this._items;
+    }
+    saveToStorage(key) {
+        localStorage.setItem(key, JSON.stringify(this._items));
+    }
+    retrieveFromStorage(key) {
+        const storedStates = localStorage.getItem(key);
+        this._items = storedStates ? JSON.parse(storedStates) : [];
     }
 }
 //////////// Access DOM ELEMENTS /////////////////////////
@@ -311,8 +325,8 @@ const isFormInputValid = () => {
 };
 // instantiate List
 const list = new ListManager();
-const undoStack = new Stack();
-const redoStack = new Stack();
+const undoStack = new Stack(UNDOSTACK_LIST);
+const redoStack = new Stack(REDO_STACK_LIST);
 // initial render
 uiManager.generateItem(list.getItems());
 uiManager.updateTotalLength(list.getItemsLength());
