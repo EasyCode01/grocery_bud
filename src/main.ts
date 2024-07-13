@@ -141,6 +141,12 @@ class UiManager implements UiManagerInterface {
 
   sendNotificationMsg(message: string, modifier: string): void {
     if (this.timeoutId !== null) {
+      this.userInterfaceElement.notificationMsgElem.classList.remove(
+        'success-msg'
+      )
+      this.userInterfaceElement.notificationMsgElem.classList.remove(
+        'error-msg'
+      )
       clearTimeout(this.timeoutId)
       this.timeoutId = null
     }
@@ -594,6 +600,18 @@ formList.addEventListener('submit', (e: Event) => {
   }
 
   if (isFormInputValid() && uiManager.isEditableForm) {
+    const ItemToEdit = list
+      .getItems()
+      .find((item) => item.id === list.itemToEditId)
+    if (ItemToEdit === undefined) {
+      uiManager.sendNotificationMsg('Sorry, Item has been deleted', 'error-msg')
+      resetForm()
+      uiManager.deactivateEditableForm()
+      exitUpdateMode()
+      attachDeleteListener()
+      attachEditListener()
+      return
+    }
     undoStack.push([...list.getItems()]) // push current state to undoStack
     redoStack.clear() // clear redoStack
     list.editItem(list.itemToEditId, updateItem())
